@@ -1,24 +1,24 @@
-// @flow
+'use strict';
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var _Symbol$iterator = _interopDefault(require('babel-runtime/core-js/symbol/iterator'));
+
 /** @module ArrayFixed */
 
 /**
  * Class representing a fixed size array.
  */
-class ArrayFixed<child> {
+class ArrayFixed {
 
-  _array: Array<child>;
-  _count: number;
-  _indexFirst: ?number;
-  _indexLast: ?number;
-
-  constructor (size: number) {
+  constructor(size) {
     this._array = new Array(size);
     this._count = 0;
     this._indexFirst = null;
     this._indexLast = null;
   }
 
-  static fromArray (arrayNew: Array<child>): ArrayFixed<child> {
+  static fromArray(arrayNew) {
     let count = 0;
     let indexFirst = null;
     let indexLast = null;
@@ -35,39 +35,39 @@ class ArrayFixed<child> {
     return arrayFixed;
   }
 
-  get size (): number {
+  get size() {
     return this._array.length;
   }
 
-  get count (): number {
+  get count() {
     return this._count;
   }
 
-  get indexFirst (): ?number {
+  get indexFirst() {
     return this._indexFirst;
   }
 
-  get indexLast (): ?number {
+  get indexLast() {
     return this._indexLast;
   }
 
   // $FlowFixMe: computed property
-  [Symbol.iterator] (): Iterator<child> {
+  [_Symbol$iterator]() {
     return this._array.values();
   }
 
-  toArray (): Array<child> {
+  toArray() {
     return [...this._array];
   }
 
-  get (index: number): ?child {
+  get(index) {
     if (index >= this._array.length || index < 0) {
       throw new RangeError();
     }
     return this._array[index];
   }
 
-  set (index: number, value: child): void {
+  set(index, value) {
     if (index >= this._array.length || index < 0) {
       throw new RangeError();
     }
@@ -86,7 +86,7 @@ class ArrayFixed<child> {
     return;
   }
 
-  delete (index: number): boolean {
+  delete(index) {
     if (index >= this._array.length || index < 0) {
       throw new RangeError();
     }
@@ -124,7 +124,7 @@ class ArrayFixed<child> {
     }
   }
 
-  collapseLeft () {
+  collapseLeft() {
     const arrayNew = new Array(this._array.length);
     let counter = 0;
     // we should be using forEach
@@ -139,7 +139,7 @@ class ArrayFixed<child> {
     }
   }
 
-  collapseRight () {
+  collapseRight() {
     const arrayNew = new Array(this._array.length);
     let counter = this._array.length - 1;
     this._array.forEach((value, index) => {
@@ -155,4 +155,4 @@ class ArrayFixed<child> {
 
 }
 
-export default ArrayFixed;
+module.exports = ArrayFixed;
