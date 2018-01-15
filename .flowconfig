@@ -1,0 +1,13 @@
+[ignore]
+.*/node_modules/documentation/.*
+
+[include]
+
+[libs]
+
+[options]
+experimental.strict_call_arity=false
+unsafe.enable_getters_and_setters=true
+
+[lints]
+all=warn
