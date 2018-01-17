@@ -112,10 +112,12 @@
   </div>
   
 
-  <p>Class representing a fixed size array.</p>
+  <p>Class representing a fixed size array.
+Functions will respect the set size.
+This also maintains a count of the non-empty items.</p>
 
 
-  <div class='pre p1 fill-light mt0'>new ArrayFixed(size: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  <div class='pre p1 fill-light mt0'>new ArrayFixed(sizeOrArray: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>))</div>
   
   
 
@@ -132,7 +134,8 @@
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>size</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+            <span class='code bold'>sizeOrArray</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>)
+            = <code>0</code>)</code>
 	    
           </div>
           

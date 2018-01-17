@@ -12,11 +12,23 @@ function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
-// 7.1.4 ToInteger
-var ceil = Math.ceil;
-var floor = Math.floor;
-var _toInteger = function (it) {
-  return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
+var _iterStep = function (done, value) {
+  return { value: value, done: !!done };
+};
+
+var _iterators = {};
+
+var toString = {}.toString;
+
+var _cof = function (it) {
+  return toString.call(it).slice(8, -1);
+};
+
+// fallback for non-array-like ES3 and non-enumerable old V8 strings
+
+// eslint-disable-next-line no-prototype-builtins
+var _iobject = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
+  return _cof(it) == 'String' ? it.split('') : Object(it);
 };
 
 // 7.2.1 RequireObjectCoercible(argument)
@@ -25,20 +37,11 @@ var _defined = function (it) {
   return it;
 };
 
-// true  -> String#at
-// false -> String#codePointAt
-var _stringAt = function (TO_STRING) {
-  return function (that, pos) {
-    var s = String(_defined(that));
-    var i = _toInteger(pos);
-    var l = s.length;
-    var a, b;
-    if (i < 0 || i >= l) return TO_STRING ? '' : undefined;
-    a = s.charCodeAt(i);
-    return a < 0xd800 || a > 0xdbff || i + 1 === l || (b = s.charCodeAt(i + 1)) < 0xdc00 || b > 0xdfff
-      ? TO_STRING ? s.charAt(i) : a
-      : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
-  };
+// to indexed object, toObject with fallback for non-array-like ES3 strings
+
+
+var _toIobject = function (it) {
+  return _iobject(_defined(it));
 };
 
 var _library = true;
@@ -230,26 +233,11 @@ var _has = function (it, key) {
   return hasOwnProperty.call(it, key);
 };
 
-var _iterators = {};
-
-var toString = {}.toString;
-
-var _cof = function (it) {
-  return toString.call(it).slice(8, -1);
-};
-
-// fallback for non-array-like ES3 and non-enumerable old V8 strings
-
-// eslint-disable-next-line no-prototype-builtins
-var _iobject = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
-  return _cof(it) == 'String' ? it.split('') : Object(it);
-};
-
-// to indexed object, toObject with fallback for non-array-like ES3 strings
-
-
-var _toIobject = function (it) {
-  return _iobject(_defined(it));
+// 7.1.4 ToInteger
+var ceil = Math.ceil;
+var floor = Math.floor;
+var _toInteger = function (it) {
+  return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
 };
 
 // 7.1.15 ToLength
@@ -505,169 +493,6 @@ var _iterDefine = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORC
   return methods;
 };
 
-var $at = _stringAt(true);
-
-// 21.1.3.27 String.prototype[@@iterator]()
-_iterDefine(String, 'String', function (iterated) {
-  this._t = String(iterated); // target
-  this._i = 0;                // next index
-// 21.1.5.2.1 %StringIteratorPrototype%.next()
-}, function () {
-  var O = this._t;
-  var index = this._i;
-  var point;
-  if (index >= O.length) return { value: undefined, done: true };
-  point = $at(O, index);
-  this._i += point.length;
-  return { value: point, done: false };
-});
-
-// call something on iterator step with safe closing on error
-
-var _iterCall = function (iterator, fn, value, entries) {
-  try {
-    return entries ? fn(_anObject(value)[0], value[1]) : fn(value);
-  // 7.4.6 IteratorClose(iterator, completion)
-  } catch (e) {
-    var ret = iterator['return'];
-    if (ret !== undefined) _anObject(ret.call(iterator));
-    throw e;
-  }
-};
-
-// check on default Array iterator
-
-var ITERATOR$1 = _wks('iterator');
-var ArrayProto = Array.prototype;
-
-var _isArrayIter = function (it) {
-  return it !== undefined && (_iterators.Array === it || ArrayProto[ITERATOR$1] === it);
-};
-
-var _createProperty = function (object, index, value) {
-  if (index in object) _objectDp.f(object, index, _propertyDesc(0, value));
-  else object[index] = value;
-};
-
-// getting tag from 19.1.3.6 Object.prototype.toString()
-
-var TAG$1 = _wks('toStringTag');
-// ES3 wrong here
-var ARG = _cof(function () { return arguments; }()) == 'Arguments';
-
-// fallback for IE11 Script Access Denied error
-var tryGet = function (it, key) {
-  try {
-    return it[key];
-  } catch (e) { /* empty */ }
-};
-
-var _classof = function (it) {
-  var O, T, B;
-  return it === undefined ? 'Undefined' : it === null ? 'Null'
-    // @@toStringTag case
-    : typeof (T = tryGet(O = Object(it), TAG$1)) == 'string' ? T
-    // builtinTag case
-    : ARG ? _cof(O)
-    // ES3 arguments fallback
-    : (B = _cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
-};
-
-var ITERATOR$2 = _wks('iterator');
-
-var core_getIteratorMethod = _core.getIteratorMethod = function (it) {
-  if (it != undefined) return it[ITERATOR$2]
-    || it['@@iterator']
-    || _iterators[_classof(it)];
-};
-
-var ITERATOR$3 = _wks('iterator');
-var SAFE_CLOSING = false;
-
-try {
-  var riter = [7][ITERATOR$3]();
-  riter['return'] = function () { SAFE_CLOSING = true; };
-  // eslint-disable-next-line no-throw-literal
-  
-} catch (e) { /* empty */ }
-
-var _iterDetect = function (exec, skipClosing) {
-  if (!skipClosing && !SAFE_CLOSING) return false;
-  var safe = false;
-  try {
-    var arr = [7];
-    var iter = arr[ITERATOR$3]();
-    iter.next = function () { return { done: safe = true }; };
-    arr[ITERATOR$3] = function () { return iter; };
-    exec(arr);
-  } catch (e) { /* empty */ }
-  return safe;
-};
-
-_export(_export.S + _export.F * !_iterDetect(function (iter) {  }), 'Array', {
-  // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
-  from: function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
-    var O = _toObject(arrayLike);
-    var C = typeof this == 'function' ? this : Array;
-    var aLen = arguments.length;
-    var mapfn = aLen > 1 ? arguments[1] : undefined;
-    var mapping = mapfn !== undefined;
-    var index = 0;
-    var iterFn = core_getIteratorMethod(O);
-    var length, result, step, iterator;
-    if (mapping) mapfn = _ctx(mapfn, aLen > 2 ? arguments[2] : undefined, 2);
-    // if object isn't iterable or it's array with default iterator - use simple case
-    if (iterFn != undefined && !(C == Array && _isArrayIter(iterFn))) {
-      for (iterator = iterFn.call(O), result = new C(); !(step = iterator.next()).done; index++) {
-        _createProperty(result, index, mapping ? _iterCall(iterator, mapfn, [step.value, index], true) : step.value);
-      }
-    } else {
-      length = _toLength(O.length);
-      for (result = new C(length); length > index; index++) {
-        _createProperty(result, index, mapping ? mapfn(O[index], index) : O[index]);
-      }
-    }
-    result.length = index;
-    return result;
-  }
-});
-
-var from$2 = _core.Array.from;
-
-var from = createCommonjsModule(function (module) {
-module.exports = { "default": from$2, __esModule: true };
-});
-
-unwrapExports(from);
-
-var toConsumableArray = createCommonjsModule(function (module, exports) {
-exports.__esModule = true;
-
-
-
-var _from2 = _interopRequireDefault(from);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-      arr2[i] = arr[i];
-    }
-
-    return arr2;
-  } else {
-    return (0, _from2.default)(arr);
-  }
-};
-});
-
-var _toConsumableArray = unwrapExports(toConsumableArray);
-
-var _iterStep = function (done, value) {
-  return { value: value, done: !!done };
-};
-
 // 22.1.3.4 Array.prototype.entries()
 // 22.1.3.13 Array.prototype.keys()
 // 22.1.3.29 Array.prototype.values()
@@ -709,6 +534,85 @@ for (var i = 0; i < DOMIterables.length; i++) {
   _iterators[NAME] = _iterators.Array;
 }
 
+// true  -> String#at
+// false -> String#codePointAt
+var _stringAt = function (TO_STRING) {
+  return function (that, pos) {
+    var s = String(_defined(that));
+    var i = _toInteger(pos);
+    var l = s.length;
+    var a, b;
+    if (i < 0 || i >= l) return TO_STRING ? '' : undefined;
+    a = s.charCodeAt(i);
+    return a < 0xd800 || a > 0xdbff || i + 1 === l || (b = s.charCodeAt(i + 1)) < 0xdc00 || b > 0xdfff
+      ? TO_STRING ? s.charAt(i) : a
+      : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
+  };
+};
+
+var $at = _stringAt(true);
+
+// 21.1.3.27 String.prototype[@@iterator]()
+_iterDefine(String, 'String', function (iterated) {
+  this._t = String(iterated); // target
+  this._i = 0;                // next index
+// 21.1.5.2.1 %StringIteratorPrototype%.next()
+}, function () {
+  var O = this._t;
+  var index = this._i;
+  var point;
+  if (index >= O.length) return { value: undefined, done: true };
+  point = $at(O, index);
+  this._i += point.length;
+  return { value: point, done: false };
+});
+
+// getting tag from 19.1.3.6 Object.prototype.toString()
+
+var TAG$1 = _wks('toStringTag');
+// ES3 wrong here
+var ARG = _cof(function () { return arguments; }()) == 'Arguments';
+
+// fallback for IE11 Script Access Denied error
+var tryGet = function (it, key) {
+  try {
+    return it[key];
+  } catch (e) { /* empty */ }
+};
+
+var _classof = function (it) {
+  var O, T, B;
+  return it === undefined ? 'Undefined' : it === null ? 'Null'
+    // @@toStringTag case
+    : typeof (T = tryGet(O = Object(it), TAG$1)) == 'string' ? T
+    // builtinTag case
+    : ARG ? _cof(O)
+    // ES3 arguments fallback
+    : (B = _cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
+};
+
+var ITERATOR$1 = _wks('iterator');
+
+var core_getIteratorMethod = _core.getIteratorMethod = function (it) {
+  if (it != undefined) return it[ITERATOR$1]
+    || it['@@iterator']
+    || _iterators[_classof(it)];
+};
+
+var core_getIterator = _core.getIterator = function (it) {
+  var iterFn = core_getIteratorMethod(it);
+  if (typeof iterFn != 'function') throw TypeError(it + ' is not iterable!');
+  return _anObject(iterFn.call(it));
+};
+
+var getIterator$1 = core_getIterator;
+
+var getIterator = createCommonjsModule(function (module) {
+module.exports = { "default": getIterator$1, __esModule: true };
+});
+
+var _getIterator = unwrapExports(getIterator);
+
 var f$1 = _wks;
 
 var _wksExt = {
@@ -722,6 +626,35 @@ module.exports = { "default": iterator$1, __esModule: true };
 });
 
 var _Symbol$iterator = unwrapExports(iterator);
+
+// most Object methods by ES6 should accept primitives
+
+
+
+var _objectSap = function (KEY, exec) {
+  var fn = (_core.Object || {})[KEY] || Object[KEY];
+  var exp = {};
+  exp[KEY] = exec(fn);
+  _export(_export.S + _export.F * _fails(function () { fn(1); }), 'Object', exp);
+};
+
+// 19.1.2.14 Object.keys(O)
+
+
+
+_objectSap('keys', function () {
+  return function keys(it) {
+    return _objectKeys(_toObject(it));
+  };
+});
+
+var keys$1 = _core.Object.keys;
+
+var keys = createCommonjsModule(function (module) {
+module.exports = { "default": keys$1, __esModule: true };
+});
+
+var _Object$keys = unwrapExports(keys);
 
 var classCallCheck = createCommonjsModule(function (module, exports) {
 exports.__esModule = true;
@@ -783,15 +716,27 @@ var _createClass = unwrapExports(createClass);
 
 /**
  * Class representing a fixed size array.
+ * Functions will respect the set size.
+ * This also maintains a count of the non-empty items.
  */
 var ArrayFixed = function () {
-  function ArrayFixed(size) {
+  function ArrayFixed() {
+    var sizeOrArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
     _classCallCheck(this, ArrayFixed);
 
-    this._array = new Array(size);
     this._count = 0;
-    this._indexFirst = null;
-    this._indexLast = null;
+
+    if (typeof sizeOrArray === 'number') {
+      this._array = new Array(sizeOrArray);
+    } else {
+      var count = 0;
+      _Object$keys(sizeOrArray).map(function () {
+        ++count;
+      });
+      this._count = count;
+      this._array = sizeOrArray.slice(); // slice preserves sparsity
+    }
   }
 
   _createClass(ArrayFixed, [{
@@ -800,26 +745,26 @@ var ArrayFixed = function () {
 
     // $FlowFixMe: computed property
     value: function value() {
-      return this._array.values();
+      return _getIterator(this._array);
     }
   }, {
-    key: "toArray",
+    key: 'toArray',
     value: function toArray() {
-      return [].concat(_toConsumableArray(this._array));
+      return this._array.slice(); // slice preserves sparsity
     }
   }, {
-    key: "get",
+    key: 'get',
     value: function get(index) {
       if (index >= this._array.length || index < 0) {
-        throw new RangeError();
+        throw new RangeError('Out of range index');
       }
       return this._array[index];
     }
   }, {
-    key: "set",
+    key: 'set',
     value: function set(index, value) {
       if (index >= this._array.length || index < 0) {
-        throw new RangeError();
+        throw new RangeError('Out of range index');
       }
       if (!this._array.hasOwnProperty(index)) {
         this._array[index] = value;
@@ -827,127 +772,107 @@ var ArrayFixed = function () {
       } else {
         this._array[index] = value;
       }
-      if (this._indexFirst == null || index < this._indexFirst) {
-        this._indexFirst = index;
-      }
-      if (this._indexLast == null || index > this._indexLast) {
-        this._indexLast = index;
-      }
       return;
     }
   }, {
-    key: "delete",
-    value: function _delete(index) {
-      var _this = this;
-
+    key: 'unset',
+    value: function unset(index) {
       if (index >= this._array.length || index < 0) {
-        throw new RangeError();
+        throw new RangeError('Out of range index');
       }
       if (this._array.hasOwnProperty(index)) {
         delete this._array[index];
         --this._count;
-        if (this._count === 0) {
-          this._indexFirst = null;
-          this._indexLast = null;
-        } else if (this._count === 1) {
-          // short circuiting find of the first defined element
-          this._array.some(function (value, index) {
-            _this._indexFirst = index;
-            _this._indexLast = index;
-            return true;
-          });
-        } else {
-          if (index === this._indexFirst) {
-            this._array.some(function (value, index) {
-              _this._indexFirst = index;
-              return true;
-            });
-          } else if (index === this._indexLast) {
-            for (var i = this._array.length - 1; i >= 0; --i) {
-              if (this._array.hasOwnProperty(i)) {
-                this._indexLast = i;
-                break;
-              }
-            }
-          }
-        }
         return true;
       } else {
         return false;
       }
     }
   }, {
-    key: "collapseLeft",
+    key: 'slice',
+    value: function slice(begin, end) {
+      return this._array.slice(begin, end);
+    }
+  }, {
+    key: 'splice',
+    value: function splice(indexStart, deleteCount) {
+      for (var _len = arguments.length, items = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+        items[_key - 2] = arguments[_key];
+      }
+
+      var _array;
+
+      // bound indexStart according to splice behaviour
+      if (indexStart > this._array.length) {
+        indexStart = this._array.length;
+      } else if (indexStart < 0) {
+        indexStart = Math.max(indexStart + this._array.length, 0);
+      }
+      // deleteCount is set to the rest of the array if only indexStart is set
+      if (arguments.length === 1) {
+        deleteCount = this._array.length - indexStart;
+      } else {
+        deleteCount = deleteCount | 0;
+      }
+      if (deleteCount !== items.length) {
+        throw RangeError('Splicing will result in underflow or overflow');
+      }
+      // count how many set items are deleted
+      var deletedCount = 0;
+      for (var i = 0; i < deleteCount; ++i) {
+        if (this._array.hasOwnProperty(indexStart + i)) ++deletedCount;
+      }
+      var deletedItems = (_array = this._array).splice.apply(_array, [indexStart, deleteCount].concat(items));
+      this._count += items.length - deletedCount;
+      return deletedItems;
+    }
+  }, {
+    key: 'map',
+    value: function map(callback) {
+      return new ArrayFixed(this._array.map(callback));
+    }
+  }, {
+    key: 'collapseLeft',
     value: function collapseLeft() {
+      var _this = this;
+
+      var arrayNew = _Object$keys(this._array).map(function (k) {
+        return _this._array[k];
+      });
+      arrayNew.length = this._array.length;
+      this._array = arrayNew;
+    }
+  }, {
+    key: 'collapseRight',
+    value: function collapseRight() {
       var _this2 = this;
 
-      var arrayNew = new Array(this._array.length);
-      var counter = 0;
-      // we should be using forEach
-      this._array.forEach(function (value, index) {
-        arrayNew[counter] = _this2._array[index];
-        ++counter;
+      var arrayNew = _Object$keys(this._array).map(function (k) {
+        return _this2._array[k];
       });
-      this._array = arrayNew;
-      if (this._count > 0) {
-        this._indexFirst = 0;
-        this._indexLast = this._count - 1;
-      }
+      this._array = new Array(this._array.length - arrayNew.length).concat(arrayNew);
     }
   }, {
-    key: "collapseRight",
-    value: function collapseRight() {
-      var _this3 = this;
-
-      var arrayNew = new Array(this._array.length);
-      var counter = this._array.length - 1;
-      this._array.forEach(function (value, index) {
-        arrayNew[counter] = _this3._array[index];
-        --counter;
-      });
-      this._array = arrayNew;
-      if (this._count > 0) {
-        this._indexFirst = this._array.length - this.count;
-        this._indexLast = this._array.length - 1;
-      }
-    }
-  }, {
-    key: "size",
+    key: 'length',
     get: function get() {
       return this._array.length;
+    },
+    set: function set(length) {
+      if (length < this._array.length) {
+        var truncated = this._array.splice(length);
+        var count = 0;
+        _Object$keys(truncated).map(function () {
+          ++count;
+        });
+        this._count -= count;
+      } else {
+        this._array.length = length;
+      }
     }
   }, {
-    key: "count",
+    key: 'count',
     get: function get() {
       return this._count;
-    }
-  }, {
-    key: "indexFirst",
-    get: function get() {
-      return this._indexFirst;
-    }
-  }, {
-    key: "indexLast",
-    get: function get() {
-      return this._indexLast;
-    }
-  }], [{
-    key: "fromArray",
-    value: function fromArray(arrayNew) {
-      var count = 0;
-      var indexFirst = null;
-      var indexLast = null;
-      arrayNew.forEach(function (value, index) {
-        if (count === 0) indexFirst = index;
-        indexLast = index;
-        ++count;
-      });
-      var arrayFixed = new ArrayFixed(arrayNew.length);
-      arrayFixed._array = arrayNew;
-      arrayFixed._count = count;
-      arrayFixed._indexFirst = indexFirst;
-      arrayFixed._indexLast = indexLast;
-      return arrayFixed;
     }
   }]);
 

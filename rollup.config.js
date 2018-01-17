@@ -24,7 +24,11 @@ export default [
         babelrc: false,
         exclude: 'node_modules/**',
         runtimeHelpers: true,
-        plugins: ['transform-object-rest-spread', 'transform-runtime'],
+        plugins: [
+          'transform-class-properties',
+          'transform-object-rest-spread',
+          'transform-runtime'
+        ],
         presets: [
           'flow',
           ['env', {
@@ -55,7 +59,11 @@ export default [
         babelrc: false,
         exclude: 'node_modules/**',
         runtimeHelpers: true,
-        plugins: ['transform-object-rest-spread', 'transform-runtime'],
+        plugins: [
+          'transform-class-properties',
+          'transform-object-rest-spread',
+          'transform-runtime'
+        ],
         presets: [
           'flow',
           ['env', {
@@ -80,7 +88,11 @@ export default [
         babelrc: false,
         exclude: 'node_modules/**',
         runtimeHelpers: true,
-        plugins: ['transform-object-rest-spread', 'transform-runtime', 'transform-class-properties'],
+        plugins: [
+          'transform-class-properties',
+          'transform-object-rest-spread',
+          'transform-runtime'
+        ],
         presets: [
           'flow',
           ['env', {
