@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.ArrayFixed = factory());
-}(this, (function () { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.ArrayFixed = {})));
+}(this, (function (exports) { 'use strict';
 
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -734,10 +734,17 @@ var ArrayFixed = function () {
       _Object$keys(sizeOrArray).map(function () {
         ++count;
       });
-      this._count = count;
       this._array = sizeOrArray.slice(); // slice preserves sparsity
+      this._count = count;
     }
   }
+
+  /**
+   * Construct from reference.
+   * This skips the integrity process in the normal constructor.
+   * The array must have the correct count.
+   */
+
 
   _createClass(ArrayFixed, [{
     key: _Symbol$iterator,
@@ -789,9 +796,15 @@ var ArrayFixed = function () {
       }
     }
   }, {
+    key: 'reverse',
+    value: function reverse() {
+      this._array.reverse();
+      return this;
+    }
+  }, {
     key: 'slice',
     value: function slice(begin, end) {
-      return this._array.slice(begin, end);
+      return ArrayFixed.fromArray(this._array.slice(begin, end));
     }
   }, {
     key: 'splice',
@@ -822,14 +835,18 @@ var ArrayFixed = function () {
       for (var i = 0; i < deleteCount; ++i) {
         if (this._array.hasOwnProperty(indexStart + i)) ++deletedCount;
       }
-      var deletedItems = (_array = this._array).splice.apply(_array, [indexStart, deleteCount].concat(items));
       this._count += items.length - deletedCount;
-      return deletedItems;
+      var deletedItems = (_array = this._array).splice.apply(_array, [indexStart, deleteCount].concat(items));
+      return ArrayFixed.fromArray(deletedItems, deletedItems.length);
     }
   }, {
     key: 'map',
     value: function map(callback) {
-      return new ArrayFixed(this._array.map(callback));
+      var arrayNew = this._array.map(function (v, i) {
+        return callback(v, i);
+      });
+
+      return ArrayFixed.fromArray(arrayNew, this._count);
     }
   }, {
     key: 'collapseLeft',
@@ -853,11 +870,23 @@ var ArrayFixed = function () {
       this._array = new Array(this._array.length - arrayNew.length).concat(arrayNew);
     }
   }, {
-    key: 'length',
-    get: function get() {
-      return this._array.length;
-    },
-    set: function set(length) {
+    key: 'truncateLeft',
+    value: function truncateLeft(length) {
+      if (length < this._array.length) {
+        var truncated = this._array.splice(0, this._array.length - length);
+        var count = 0;
+        _Object$keys(truncated).map(function () {
+          ++count;
+        });
+        this._count -= count;
+      } else {
+        this._array = new Array(length - this._array.length).concat(this._array);
+      }
+      return;
+    }
+  }, {
+    key: 'truncateRight',
+    value: function truncateRight(length) {
       if (length < this._array.length) {
         var truncated = this._array.splice(length);
         var count = 0;
@@ -868,17 +897,831 @@ var ArrayFixed = function () {
       } else {
         this._array.length = length;
       }
+      return;
+    }
+  }, {
+    key: 'length',
+    get: function get() {
+      return this._array.length;
+    },
+    set: function set(length) {
+      return this.truncateRight(length);
     }
   }, {
     key: 'count',
     get: function get() {
       return this._count;
     }
+  }], [{
+    key: 'fromArray',
+    value: function fromArray(array, count) {
+      var arrayFixed = new ArrayFixed(array.length);
+      arrayFixed._array = array;
+      arrayFixed._count = count;
+      return arrayFixed;
+    }
   }]);
 
   return ArrayFixed;
 }();
 
-return ArrayFixed;
+// 19.1.2.9 Object.getPrototypeOf(O)
+
+
+
+_objectSap('getPrototypeOf', function () {
+  return function getPrototypeOf(it) {
+    return _objectGpo(_toObject(it));
+  };
+});
+
+var getPrototypeOf$1 = _core.Object.getPrototypeOf;
+
+var getPrototypeOf = createCommonjsModule(function (module) {
+module.exports = { "default": getPrototypeOf$1, __esModule: true };
+});
+
+var _Object$getPrototypeOf = unwrapExports(getPrototypeOf);
+
+var _meta = createCommonjsModule(function (module) {
+var META = _uid('meta');
+
+
+var setDesc = _objectDp.f;
+var id = 0;
+var isExtensible = Object.isExtensible || function () {
+  return true;
+};
+var FREEZE = !_fails(function () {
+  return isExtensible(Object.preventExtensions({}));
+});
+var setMeta = function (it) {
+  setDesc(it, META, { value: {
+    i: 'O' + ++id, // object ID
+    w: {}          // weak collections IDs
+  } });
+};
+var fastKey = function (it, create) {
+  // return primitive with prefix
+  if (!_isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+  if (!_has(it, META)) {
+    // can't set metadata to uncaught frozen object
+    if (!isExtensible(it)) return 'F';
+    // not necessary to add metadata
+    if (!create) return 'E';
+    // add missing metadata
+    setMeta(it);
+  // return object ID
+  } return it[META].i;
+};
+var getWeak = function (it, create) {
+  if (!_has(it, META)) {
+    // can't set metadata to uncaught frozen object
+    if (!isExtensible(it)) return true;
+    // not necessary to add metadata
+    if (!create) return false;
+    // add missing metadata
+    setMeta(it);
+  // return hash weak collections IDs
+  } return it[META].w;
+};
+// add metadata on freeze-family methods calling
+var onFreeze = function (it) {
+  if (FREEZE && meta.NEED && isExtensible(it) && !_has(it, META)) setMeta(it);
+  return it;
+};
+var meta = module.exports = {
+  KEY: META,
+  NEED: false,
+  fastKey: fastKey,
+  getWeak: getWeak,
+  onFreeze: onFreeze
+};
+});
+
+var _meta_1 = _meta.KEY;
+var _meta_2 = _meta.NEED;
+var _meta_3 = _meta.fastKey;
+var _meta_4 = _meta.getWeak;
+var _meta_5 = _meta.onFreeze;
+
+var defineProperty$4 = _objectDp.f;
+var _wksDefine = function (name) {
+  var $Symbol = _core.Symbol || (_core.Symbol = _library ? {} : _global.Symbol || {});
+  if (name.charAt(0) != '_' && !(name in $Symbol)) defineProperty$4($Symbol, name, { value: _wksExt.f(name) });
+};
+
+var f$2 = Object.getOwnPropertySymbols;
+
+var _objectGops = {
+	f: f$2
+};
+
+var f$3 = {}.propertyIsEnumerable;
+
+var _objectPie = {
+	f: f$3
+};
+
+// all enumerable object keys, includes symbols
+
+
+
+var _enumKeys = function (it) {
+  var result = _objectKeys(it);
+  var getSymbols = _objectGops.f;
+  if (getSymbols) {
+    var symbols = getSymbols(it);
+    var isEnum = _objectPie.f;
+    var i = 0;
+    var key;
+    while (symbols.length > i) if (isEnum.call(it, key = symbols[i++])) result.push(key);
+  } return result;
+};
+
+// 7.2.2 IsArray(argument)
+
+var _isArray = Array.isArray || function isArray(arg) {
+  return _cof(arg) == 'Array';
+};
+
+// 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
+
+var hiddenKeys = _enumBugKeys.concat('length', 'prototype');
+
+var f$5 = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
+  return _objectKeysInternal(O, hiddenKeys);
+};
+
+var _objectGopn = {
+	f: f$5
+};
+
+// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+
+var gOPN$1 = _objectGopn.f;
+var toString$1 = {}.toString;
+
+var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
+  ? Object.getOwnPropertyNames(window) : [];
+
+var getWindowNames = function (it) {
+  try {
+    return gOPN$1(it);
+  } catch (e) {
+    return windowNames.slice();
+  }
+};
+
+var f$4 = function getOwnPropertyNames(it) {
+  return windowNames && toString$1.call(it) == '[object Window]' ? getWindowNames(it) : gOPN$1(_toIobject(it));
+};
+
+var _objectGopnExt = {
+	f: f$4
+};
+
+var gOPD$1 = Object.getOwnPropertyDescriptor;
+
+var f$6 = _descriptors ? gOPD$1 : function getOwnPropertyDescriptor(O, P) {
+  O = _toIobject(O);
+  P = _toPrimitive(P, true);
+  if (_ie8DomDefine) try {
+    return gOPD$1(O, P);
+  } catch (e) { /* empty */ }
+  if (_has(O, P)) return _propertyDesc(!_objectPie.f.call(O, P), O[P]);
+};
+
+var _objectGopd = {
+	f: f$6
+};
+
+// ECMAScript 6 symbols shim
+
+
+
+
+
+var META = _meta.KEY;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var gOPD = _objectGopd.f;
+var dP$1 = _objectDp.f;
+var gOPN = _objectGopnExt.f;
+var $Symbol = _global.Symbol;
+var $JSON = _global.JSON;
+var _stringify = $JSON && $JSON.stringify;
+var PROTOTYPE$2 = 'prototype';
+var HIDDEN = _wks('_hidden');
+var TO_PRIMITIVE = _wks('toPrimitive');
+var isEnum = {}.propertyIsEnumerable;
+var SymbolRegistry = _shared('symbol-registry');
+var AllSymbols = _shared('symbols');
+var OPSymbols = _shared('op-symbols');
+var ObjectProto$1 = Object[PROTOTYPE$2];
+var USE_NATIVE = typeof $Symbol == 'function';
+var QObject = _global.QObject;
+// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
+var setter = !QObject || !QObject[PROTOTYPE$2] || !QObject[PROTOTYPE$2].findChild;
+
+// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
+var setSymbolDesc = _descriptors && _fails(function () {
+  return _objectCreate(dP$1({}, 'a', {
+    get: function () { return dP$1(this, 'a', { value: 7 }).a; }
+  })).a != 7;
+}) ? function (it, key, D) {
+  var protoDesc = gOPD(ObjectProto$1, key);
+  if (protoDesc) delete ObjectProto$1[key];
+  dP$1(it, key, D);
+  if (protoDesc && it !== ObjectProto$1) dP$1(ObjectProto$1, key, protoDesc);
+} : dP$1;
+
+var wrap = function (tag) {
+  var sym = AllSymbols[tag] = _objectCreate($Symbol[PROTOTYPE$2]);
+  sym._k = tag;
+  return sym;
+};
+
+var isSymbol = USE_NATIVE && typeof $Symbol.iterator == 'symbol' ? function (it) {
+  return typeof it == 'symbol';
+} : function (it) {
+  return it instanceof $Symbol;
+};
+
+var $defineProperty = function defineProperty(it, key, D) {
+  if (it === ObjectProto$1) $defineProperty(OPSymbols, key, D);
+  _anObject(it);
+  key = _toPrimitive(key, true);
+  _anObject(D);
+  if (_has(AllSymbols, key)) {
+    if (!D.enumerable) {
+      if (!_has(it, HIDDEN)) dP$1(it, HIDDEN, _propertyDesc(1, {}));
+      it[HIDDEN][key] = true;
+    } else {
+      if (_has(it, HIDDEN) && it[HIDDEN][key]) it[HIDDEN][key] = false;
+      D = _objectCreate(D, { enumerable: _propertyDesc(0, false) });
+    } return setSymbolDesc(it, key, D);
+  } return dP$1(it, key, D);
+};
+var $defineProperties = function defineProperties(it, P) {
+  _anObject(it);
+  var keys = _enumKeys(P = _toIobject(P));
+  var i = 0;
+  var l = keys.length;
+  var key;
+  while (l > i) $defineProperty(it, key = keys[i++], P[key]);
+  return it;
+};
+var $create = function create(it, P) {
+  return P === undefined ? _objectCreate(it) : $defineProperties(_objectCreate(it), P);
+};
+var $propertyIsEnumerable = function propertyIsEnumerable(key) {
+  var E = isEnum.call(this, key = _toPrimitive(key, true));
+  if (this === ObjectProto$1 && _has(AllSymbols, key) && !_has(OPSymbols, key)) return false;
+  return E || !_has(this, key) || !_has(AllSymbols, key) || _has(this, HIDDEN) && this[HIDDEN][key] ? E : true;
+};
+var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(it, key) {
+  it = _toIobject(it);
+  key = _toPrimitive(key, true);
+  if (it === ObjectProto$1 && _has(AllSymbols, key) && !_has(OPSymbols, key)) return;
+  var D = gOPD(it, key);
+  if (D && _has(AllSymbols, key) && !(_has(it, HIDDEN) && it[HIDDEN][key])) D.enumerable = true;
+  return D;
+};
+var $getOwnPropertyNames = function getOwnPropertyNames(it) {
+  var names = gOPN(_toIobject(it));
+  var result = [];
+  var i = 0;
+  var key;
+  while (names.length > i) {
+    if (!_has(AllSymbols, key = names[i++]) && key != HIDDEN && key != META) result.push(key);
+  } return result;
+};
+var $getOwnPropertySymbols = function getOwnPropertySymbols(it) {
+  var IS_OP = it === ObjectProto$1;
+  var names = gOPN(IS_OP ? OPSymbols : _toIobject(it));
+  var result = [];
+  var i = 0;
+  var key;
+  while (names.length > i) {
+    if (_has(AllSymbols, key = names[i++]) && (IS_OP ? _has(ObjectProto$1, key) : true)) result.push(AllSymbols[key]);
+  } return result;
+};
+
+// 19.4.1.1 Symbol([description])
+if (!USE_NATIVE) {
+  $Symbol = function Symbol() {
+    if (this instanceof $Symbol) throw TypeError('Symbol is not a constructor!');
+    var tag = _uid(arguments.length > 0 ? arguments[0] : undefined);
+    var $set = function (value) {
+      if (this === ObjectProto$1) $set.call(OPSymbols, value);
+      if (_has(this, HIDDEN) && _has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+      setSymbolDesc(this, tag, _propertyDesc(1, value));
+    };
+    if (_descriptors && setter) setSymbolDesc(ObjectProto$1, tag, { configurable: true, set: $set });
+    return wrap(tag);
+  };
+  _redefine($Symbol[PROTOTYPE$2], 'toString', function toString() {
+    return this._k;
+  });
+
+  _objectGopd.f = $getOwnPropertyDescriptor;
+  _objectDp.f = $defineProperty;
+  _objectGopn.f = _objectGopnExt.f = $getOwnPropertyNames;
+  _objectPie.f = $propertyIsEnumerable;
+  _objectGops.f = $getOwnPropertySymbols;
+
+  if (_descriptors && !_library) {
+    _redefine(ObjectProto$1, 'propertyIsEnumerable', $propertyIsEnumerable, true);
+  }
+
+  _wksExt.f = function (name) {
+    return wrap(_wks(name));
+  };
+}
+
+_export(_export.G + _export.W + _export.F * !USE_NATIVE, { Symbol: $Symbol });
+
+for (var es6Symbols = (
+  // 19.4.2.2, 19.4.2.3, 19.4.2.4, 19.4.2.6, 19.4.2.8, 19.4.2.9, 19.4.2.10, 19.4.2.11, 19.4.2.12, 19.4.2.13, 19.4.2.14
+  'hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables'
+).split(','), j = 0; es6Symbols.length > j;)_wks(es6Symbols[j++]);
+
+for (var wellKnownSymbols = _objectKeys(_wks.store), k = 0; wellKnownSymbols.length > k;) _wksDefine(wellKnownSymbols[k++]);
+
+_export(_export.S + _export.F * !USE_NATIVE, 'Symbol', {
+  // 19.4.2.1 Symbol.for(key)
+  'for': function (key) {
+    return _has(SymbolRegistry, key += '')
+      ? SymbolRegistry[key]
+      : SymbolRegistry[key] = $Symbol(key);
+  },
+  // 19.4.2.5 Symbol.keyFor(sym)
+  keyFor: function keyFor(sym) {
+    if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol!');
+    for (var key in SymbolRegistry) if (SymbolRegistry[key] === sym) return key;
+  },
+  useSetter: function () { setter = true; },
+  useSimple: function () { setter = false; }
+});
+
+_export(_export.S + _export.F * !USE_NATIVE, 'Object', {
+  // 19.1.2.2 Object.create(O [, Properties])
+  create: $create,
+  // 19.1.2.4 Object.defineProperty(O, P, Attributes)
+  defineProperty: $defineProperty,
+  // 19.1.2.3 Object.defineProperties(O, Properties)
+  defineProperties: $defineProperties,
+  // 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
+  getOwnPropertyDescriptor: $getOwnPropertyDescriptor,
+  // 19.1.2.7 Object.getOwnPropertyNames(O)
+  getOwnPropertyNames: $getOwnPropertyNames,
+  // 19.1.2.8 Object.getOwnPropertySymbols(O)
+  getOwnPropertySymbols: $getOwnPropertySymbols
+});
+
+// 24.3.2 JSON.stringify(value [, replacer [, space]])
+$JSON && _export(_export.S + _export.F * (!USE_NATIVE || _fails(function () {
+  var S = $Symbol();
+  // MS Edge converts symbol values to JSON as {}
+  // WebKit converts symbol values to JSON as null
+  // V8 throws on boxed symbols
+  return _stringify([S]) != '[null]' || _stringify({ a: S }) != '{}' || _stringify(Object(S)) != '{}';
+})), 'JSON', {
+  stringify: function stringify(it) {
+    var args = [it];
+    var i = 1;
+    var replacer, $replacer;
+    while (arguments.length > i) args.push(arguments[i++]);
+    $replacer = replacer = args[1];
+    if (!_isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
+    if (!_isArray(replacer)) replacer = function (key, value) {
+      if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+      if (!isSymbol(value)) return value;
+    };
+    args[1] = replacer;
+    return _stringify.apply($JSON, args);
+  }
+});
+
+// 19.4.3.4 Symbol.prototype[@@toPrimitive](hint)
+$Symbol[PROTOTYPE$2][TO_PRIMITIVE] || _hide($Symbol[PROTOTYPE$2], TO_PRIMITIVE, $Symbol[PROTOTYPE$2].valueOf);
+// 19.4.3.5 Symbol.prototype[@@toStringTag]
+_setToStringTag($Symbol, 'Symbol');
+// 20.2.1.9 Math[@@toStringTag]
+_setToStringTag(Math, 'Math', true);
+// 24.3.3 JSON[@@toStringTag]
+_setToStringTag(_global.JSON, 'JSON', true);
+
+_wksDefine('asyncIterator');
+
+_wksDefine('observable');
+
+var symbol$2 = _core.Symbol;
+
+var symbol = createCommonjsModule(function (module) {
+module.exports = { "default": symbol$2, __esModule: true };
+});
+
+unwrapExports(symbol);
+
+var _typeof_1 = createCommonjsModule(function (module, exports) {
+exports.__esModule = true;
+
+
+
+var _iterator2 = _interopRequireDefault(iterator);
+
+
+
+var _symbol2 = _interopRequireDefault(symbol);
+
+var _typeof = typeof _symbol2.default === "function" && typeof _iterator2.default === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj; };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.default) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof(obj);
+} : function (obj) {
+  return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
+};
+});
+
+unwrapExports(_typeof_1);
+
+var possibleConstructorReturn = createCommonjsModule(function (module, exports) {
+exports.__esModule = true;
+
+
+
+var _typeof3 = _interopRequireDefault(_typeof_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && ((typeof call === "undefined" ? "undefined" : (0, _typeof3.default)(call)) === "object" || typeof call === "function") ? call : self;
+};
+});
+
+var _possibleConstructorReturn = unwrapExports(possibleConstructorReturn);
+
+// 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
+
+var $getOwnPropertyDescriptor$1 = _objectGopd.f;
+
+_objectSap('getOwnPropertyDescriptor', function () {
+  return function getOwnPropertyDescriptor(it, key) {
+    return $getOwnPropertyDescriptor$1(_toIobject(it), key);
+  };
+});
+
+var $Object$1 = _core.Object;
+var getOwnPropertyDescriptor$2 = function getOwnPropertyDescriptor(it, key) {
+  return $Object$1.getOwnPropertyDescriptor(it, key);
+};
+
+var getOwnPropertyDescriptor = createCommonjsModule(function (module) {
+module.exports = { "default": getOwnPropertyDescriptor$2, __esModule: true };
+});
+
+unwrapExports(getOwnPropertyDescriptor);
+
+var get$1 = createCommonjsModule(function (module, exports) {
+exports.__esModule = true;
+
+
+
+var _getPrototypeOf2 = _interopRequireDefault(getPrototypeOf);
+
+
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(getOwnPropertyDescriptor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = (0, _getOwnPropertyDescriptor2.default)(object, property);
+
+  if (desc === undefined) {
+    var parent = (0, _getPrototypeOf2.default)(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+});
+
+var _get = unwrapExports(get$1);
+
+// Works with __proto__ only. Old v8 can't work with null proto objects.
+/* eslint-disable no-proto */
+
+
+var check = function (O, proto) {
+  _anObject(O);
+  if (!_isObject(proto) && proto !== null) throw TypeError(proto + ": can't set as prototype!");
+};
+var _setProto = {
+  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
+    function (test, buggy, set) {
+      try {
+        set = _ctx(Function.call, _objectGopd.f(Object.prototype, '__proto__').set, 2);
+        set(test, []);
+        buggy = !(test instanceof Array);
+      } catch (e) { buggy = true; }
+      return function setPrototypeOf(O, proto) {
+        check(O, proto);
+        if (buggy) O.__proto__ = proto;
+        else set(O, proto);
+        return O;
+      };
+    }({}, false) : undefined),
+  check: check
+};
+
+// 19.1.3.19 Object.setPrototypeOf(O, proto)
+
+_export(_export.S, 'Object', { setPrototypeOf: _setProto.set });
+
+var setPrototypeOf$2 = _core.Object.setPrototypeOf;
+
+var setPrototypeOf = createCommonjsModule(function (module) {
+module.exports = { "default": setPrototypeOf$2, __esModule: true };
+});
+
+unwrapExports(setPrototypeOf);
+
+// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
+_export(_export.S, 'Object', { create: _objectCreate });
+
+var $Object$2 = _core.Object;
+var create$2 = function create(P, D) {
+  return $Object$2.create(P, D);
+};
+
+var create = createCommonjsModule(function (module) {
+module.exports = { "default": create$2, __esModule: true };
+});
+
+unwrapExports(create);
+
+var inherits = createCommonjsModule(function (module, exports) {
+exports.__esModule = true;
+
+
+
+var _setPrototypeOf2 = _interopRequireDefault(setPrototypeOf);
+
+
+
+var _create2 = _interopRequireDefault(create);
+
+
+
+var _typeof3 = _interopRequireDefault(_typeof_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === "undefined" ? "undefined" : (0, _typeof3.default)(superClass)));
+  }
+
+  subClass.prototype = (0, _create2.default)(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf2.default ? (0, _setPrototypeOf2.default)(subClass, superClass) : subClass.__proto__ = superClass;
+};
+});
+
+var _inherits = unwrapExports(inherits);
+
+/** @module ArrayFixedDense */
+
+/**
+ * Class representing a fixed size dense array.
+ * This ensures that mutation always results in a dense array.
+ */
+
+var ArrayFixedDense = function (_ArrayFixed) {
+  _inherits(ArrayFixedDense, _ArrayFixed);
+
+  function ArrayFixedDense() {
+    var sizeOrArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var direction = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+    _classCallCheck(this, ArrayFixedDense);
+
+    if (Array.isArray(sizeOrArray)) {
+      var arrayNew = _Object$keys(sizeOrArray).map(function (k) {
+        return sizeOrArray[k];
+      });
+      if (direction) {
+        arrayNew.length = sizeOrArray.length;
+        sizeOrArray = arrayNew;
+      } else {
+        sizeOrArray = new Array(sizeOrArray.length - arrayNew.length).concat(arrayNew);
+      }
+    }
+
+    var _this = _possibleConstructorReturn(this, (ArrayFixedDense.__proto__ || _Object$getPrototypeOf(ArrayFixedDense)).call(this, sizeOrArray));
+
+    _this._direction = direction;
+    return _this;
+  }
+
+  /**
+   * Construct from reference.
+   * This skips the integrity process in the normal constructor.
+   * The array must already be dense, and have the correct count and direction.
+   */
+
+
+  _createClass(ArrayFixedDense, [{
+    key: 'switchDirection',
+    value: function switchDirection(direction) {
+      if (direction !== this._direction) {
+        if (direction) {
+          _get(ArrayFixedDense.prototype.__proto__ || _Object$getPrototypeOf(ArrayFixedDense.prototype), 'collapseLeft', this).call(this);
+        } else {
+          _get(ArrayFixedDense.prototype.__proto__ || _Object$getPrototypeOf(ArrayFixedDense.prototype), 'collapseRight', this).call(this);
+        }
+        this._direction = direction;
+      }
+    }
+  }, {
+    key: 'set',
+    value: function set(index, value) {
+      // we always start with a dense array
+      // if we are just replacing an element
+      // there's no problem
+      if (!this._array.hasOwnProperty(index)) {
+        if (index >= this._array.length || index < 0) {
+          throw new RangeError('Out of range index');
+        }
+        // find the next or previous open slot
+        if (this._direction) {
+          index = this._count;
+        } else {
+          index = this._array.length - this._count - 1;
+        }
+      }
+      return _get(ArrayFixedDense.prototype.__proto__ || _Object$getPrototypeOf(ArrayFixedDense.prototype), 'set', this).call(this, index, value);
+    }
+  }, {
+    key: 'unset',
+    value: function unset(index) {
+      if (this._array.hasOwnProperty(index)) {
+        if (index >= this._array.length || index < 0) {
+          throw new RangeError('Out of range index');
+        }
+        var lengthOrig = this._array.length;
+        _get(ArrayFixedDense.prototype.__proto__ || _Object$getPrototypeOf(ArrayFixedDense.prototype), 'unset', this).call(this, index);
+        if (this._direction) {
+          this._array.copyWithin(index, index + 1);
+          delete this._array[this._array.length - 1];
+        } else {
+          this._array.copyWithin(1, 0, index);
+          delete this._array[0];
+        }
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: 'reverse',
+    value: function reverse() {
+      var swapStart = void 0,
+          swapMid = void 0;
+      if (this._direction) {
+        swapStart = 0;
+        swapMid = Math.floor(this._count / 2);
+        for (var i = swapStart; i < swapMid; ++i) {
+          var _ref = [this._array[this._count - i - 1], this._array[i]];
+          this._array[i] = _ref[0];
+          this._array[this._count - i - 1] = _ref[1];
+        }
+      } else {
+        swapStart = this._array.length - this._count;
+        swapMid = Math.floor(this._count / 2) + swapStart;
+        for (var _i = swapStart; _i < swapMid; ++_i) {
+          var _ref2 = [this._array[this._array.length - _i + swapStart - 1], this._array[_i]];
+          this._array[_i] = _ref2[0];
+          this._array[this._array.length - _i + swapStart - 1] = _ref2[1];
+        }
+      }
+      return this;
+    }
+  }, {
+    key: 'slice',
+    value: function slice(begin, end) {
+      return ArrayFixedDense.fromArray(this._array.slice(begin, end));
+    }
+  }, {
+    key: 'splice',
+    value: function splice(indexStart, deleteCount) {
+      for (var _len = arguments.length, items = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+        items[_key - 2] = arguments[_key];
+      }
+
+      var _array;
+
+      if (indexStart < 0) {
+        indexStart = Math.max(indexStart + this._array.length, 0);
+      }
+      if (this._direction) {
+        if (indexStart > this._count) {
+          indexStart = this._count;
+        }
+      } else {
+        if (indexStart < this._array.length - this._count - 1) {
+          indexStart = this._array.length - this._count - 1;
+        }
+      }
+      // deleteCount is set to the rest of the array if only indexStart is set
+      if (arguments.length === 1) {
+        deleteCount = this._array.length - indexStart;
+      } else {
+        deleteCount = deleteCount | 0;
+      }
+      if (deleteCount !== items.length) {
+        throw RangeError('Splicing will result in underflow or overflow');
+      }
+      // count how many set items are deleted
+      var deletedCount = 0;
+      for (var i = 0; i < deleteCount; ++i) {
+        if (this._array.hasOwnProperty(indexStart + i)) ++deletedCount;
+      }
+      this._count += items.length - deletedCount;
+      var deletedItems = (_array = this._array).splice.apply(_array, [indexStart, deleteCount].concat(items));
+      return ArrayFixedDense.fromArray(deletedItems, deletedItems.length, this._direction);
+    }
+  }, {
+    key: 'map',
+    value: function map(callback) {
+      var arrayNew = this._array.map(function (v, i) {
+        return callback(v, i);
+      });
+      return ArrayFixedDense.fromArray(arrayNew, this._count, this._direction);
+    }
+  }], [{
+    key: 'fromArray',
+    value: function fromArray(array, count, direction) {
+      var arrayFixedDense = new ArrayFixedDense(array.length);
+      arrayFixedDense._array = array;
+      arrayFixedDense._count = count;
+      arrayFixedDense._direction = direction;
+      return arrayFixedDense;
+    }
+  }]);
+
+  return ArrayFixedDense;
+}(ArrayFixed);
+
+exports['default'] = ArrayFixed;
+exports.ArrayFixedDense = ArrayFixedDense;
+
+Object.defineProperty(exports, '__esModule', { value: true });
 
 })));

@@ -61,9 +61,9 @@ test('splice', t => {
 
 test('map', t => {
   const arr = new ArrayFixed([1,2,,4,5,,]);
-  const arrM = arr.map((number, index, array) => {
+  const arrM = arr.map((number, index) => {
     return number.toString();
   });
-  t.deepEqual([...arrM], ['1', '2', undefined, '4', '5', undefined]);
+  t.deepEqual(arrM.toArray(), ['1', '2', , '4', '5', ,]);
   t.is(arrM.count, 4);
 });
