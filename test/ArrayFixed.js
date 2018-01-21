@@ -1,7 +1,7 @@
 import test from 'ava';
 import ArrayFixed from '../lib/ArrayFixed.js';
 
-test('static construction from array', t => {
+test('construction from array', t => {
   const arr = new ArrayFixed([,1,,1,,1,,]);
   t.is(arr.length, 7);
   t.is(arr.count, 3);
