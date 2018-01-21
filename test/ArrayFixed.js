@@ -15,6 +15,18 @@ test('setting elements', t => {
 });
 
 test('truncation', t => {
+  let arr;
+  arr = new ArrayFixed([1,2,3,,,,]);
+  arr.truncateLeft(3);
+  t.is(arr.length, 3);
+  t.is(arr.count, 0);
+  arr = new ArrayFixed([1,2,3,,,,]);
+  arr.truncateRight(3);
+  t.is(arr.length, 3);
+  t.is(arr.count, 3);
+});
+
+test('truncation using length', t => {
   const arr = new ArrayFixed(100);
   arr.set(0, 1);
   arr.set(99, 1);
