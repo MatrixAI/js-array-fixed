@@ -81,7 +81,7 @@ export default [
     output: {
       file: 'dist/index.browser.umd.js',
       format: 'umd',
-      name: 'ArrayFixed'
+      name: 'array-fixed'
     },
     plugins: [
       babel({
