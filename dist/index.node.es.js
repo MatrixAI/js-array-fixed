@@ -98,7 +98,21 @@ class ArrayFixed {
   }
 
   slice(begin, end) {
-    return ArrayFixed.fromArray(this._array.slice(begin, end));
+    if (begin == null) begin = 0;
+    if (end == null) end = this._array.length;
+    if (begin < 0) {
+      begin = Math.max(begin + this._array.length, 0);
+    }
+    if (end < 0) {
+      end = Math.max(end + this._array.length, 0);
+    }
+    let count;
+    if (this._direction) {
+      count = Math.max(this._count - begin, 0) - Math.max(this._count - end, 0);
+    } else {
+      count = Math.max(end - this._count, 0) - Math.max(begin - this._count, 0);
+    }
+    return ArrayFixed.fromArray(this._array.slice(begin, end), count);
   }
 
   splice(indexStart, deleteCount, ...items) {
@@ -281,7 +295,21 @@ class ArrayFixedDense extends ArrayFixed {
   }
 
   slice(begin, end) {
-    return ArrayFixedDense.fromArray(this._array.slice(begin, end));
+    if (begin == null) begin = 0;
+    if (end == null) end = this._array.length;
+    if (begin < 0) {
+      begin = Math.max(begin + this._array.length, 0);
+    }
+    if (end < 0) {
+      end = Math.max(end + this._array.length, 0);
+    }
+    let count;
+    if (this._direction) {
+      count = Math.max(this._count - begin, 0) - Math.max(this._count - end, 0);
+    } else {
+      count = Math.max(end - this._count, 0) - Math.max(begin - this._count, 0);
+    }
+    return ArrayFixedDense.fromArray(this._array.slice(begin, end), count, this._direction);
   }
 
   splice(indexStart, deleteCount, ...items) {
