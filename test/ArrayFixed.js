@@ -48,6 +48,27 @@ test('iterator', t => {
   t.deepEqual([...arr], [...arrF]);
 });
 
+test('slice', t => {
+  let arr, slice;
+  arr = new ArrayFixed([1,2,3,4, , ,]);
+  slice = arr.slice(0, arr.count / 2);
+  t.deepEqual(slice.toArray(), [1,2]);
+  slice = arr.slice(arr.count / 2);
+  t.deepEqual(slice.toArray(), [3,4, , ,]);
+  slice = arr.slice(0);
+  t.deepEqual(slice.toArray(), [1,2,3,4, , ,]);
+  slice = arr.slice(-2);
+  t.deepEqual(slice.toArray(), [ , ,]);
+  slice = arr.slice(-3, 4);
+  t.deepEqual(slice.toArray(), [4]);
+  slice = arr.slice(-3, -2);
+  t.deepEqual(slice.toArray(), [4]);
+  slice = arr.slice(2, 1);
+  t.deepEqual(slice.toArray(), []);
+  slice = arr.slice(arr.length);
+  t.deepEqual(slice.toArray(), []);
+});
+
 test('splice', t => {
   const arr = new ArrayFixed([1,2,,4,5,,]);
   t.is(arr.count, 4);

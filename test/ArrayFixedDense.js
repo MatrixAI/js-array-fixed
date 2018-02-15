@@ -79,6 +79,44 @@ test('unsetting elements', t => {
   t.deepEqual(arr.toArray(), [ ,]);
 });
 
+test('slice', t => {
+  let arr, slice;
+  arr = new ArrayFixedDense([1,2,3,4, , ,]);
+  slice = arr.slice(0, arr.count / 2);
+  t.deepEqual(slice.toArray(), [1,2]);
+  slice = arr.slice(arr.count / 2);
+  t.deepEqual(slice.toArray(), [3,4, , ,]);
+  slice = arr.slice(0);
+  t.deepEqual(slice.toArray(), [1,2,3,4, , ,]);
+  slice = arr.slice(-2);
+  t.deepEqual(slice.toArray(), [ , ,]);
+  slice = arr.slice(-3, 4);
+  t.deepEqual(slice.toArray(), [4]);
+  slice = arr.slice(-3, -2);
+  t.deepEqual(slice.toArray(), [4]);
+  slice = arr.slice(2, 1);
+  t.deepEqual(slice.toArray(), []);
+  slice = arr.slice(arr.length);
+  t.deepEqual(slice.toArray(), []);
+  arr = new ArrayFixedDense([ , ,1,2,3,4], false);
+  slice = arr.slice(0, arr.count / 2);
+  t.deepEqual(slice.toArray(), [ , ,]);
+  slice = arr.slice(arr.count / 2);
+  t.deepEqual(slice.toArray(), [1,2,3,4]);
+  slice = arr.slice(0);
+  t.deepEqual(slice.toArray(), [ , ,1,2,3,4]);
+  slice = arr.slice(-2);
+  t.deepEqual(slice.toArray(), [3,4]);
+  slice = arr.slice(-3, 4);
+  t.deepEqual(slice.toArray(), [2]);
+  slice = arr.slice(-3, -2);
+  t.deepEqual(slice.toArray(), [2]);
+  slice = arr.slice(2, 1);
+  t.deepEqual(slice.toArray(), []);
+  slice = arr.slice(arr.length);
+  t.deepEqual(slice.toArray(), []);
+});
+
 test('splice', t => {
   let arr;
   arr = new ArrayFixedDense([1,2,3,4, , ,]);
