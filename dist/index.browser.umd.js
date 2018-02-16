@@ -863,6 +863,11 @@ var ArrayFixed = function () {
       return ArrayFixed.fromArray(arrayNew, this._count);
     }
   }, {
+    key: 'findIndex',
+    value: function findIndex(callback) {
+      return this._array.findIndex(callback);
+    }
+  }, {
     key: 'collapseLeft',
     value: function collapseLeft() {
       var _this = this;

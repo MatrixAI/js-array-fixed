@@ -147,6 +147,10 @@ class ArrayFixed {
     return ArrayFixed.fromArray(arrayNew, this._count);
   }
 
+  findIndex(callback) {
+    return this._array.findIndex(callback);
+  }
+
   collapseLeft() {
     const arrayNew = _Object$keys(this._array).map(k => this._array[k]);
     arrayNew.length = this._array.length;
