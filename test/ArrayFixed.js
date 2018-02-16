@@ -88,3 +88,10 @@ test('map', t => {
   t.deepEqual(arrM.toArray(), ['1', '2', , '4', '5', ,]);
   t.is(arrM.count, 4);
 });
+
+test('findIndex', t => {
+  const arr = new ArrayFixed([1,2,,4,5,,]);
+  t.is(arr.findIndex((e) => e === undefined), 2);
+  t.is(arr.findIndex((e) => e === 1), 0);
+  t.is(arr.findIndex((e) => e === 5), 4);
+});

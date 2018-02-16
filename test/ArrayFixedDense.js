@@ -147,3 +147,15 @@ test('map', t => {
   t.deepEqual(arrM.toArray(), ['1','2','4','5', , ,]);
   t.is(arrM.count, 4);
 });
+
+test('findIndex', t => {
+  let arr;
+  arr = new ArrayFixedDense([1,2,,4,5,,]);
+  t.is(arr.findIndex((e) => e === undefined), 4);
+  t.is(arr.findIndex((e) => e === 1), 0);
+  t.is(arr.findIndex((e) => e === 5), 3);
+  arr = new ArrayFixedDense([1,2, ,4,5, ,], false);
+  t.is(arr.findIndex((e) => e === undefined), 0);
+  t.is(arr.findIndex((e) => e === 1), 2);
+  t.is(arr.findIndex((e) => e === 5), 5);
+});
