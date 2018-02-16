@@ -2,7 +2,7 @@ import test from 'ava';
 import ArrayFixed from '../lib/ArrayFixed.js';
 
 test('construction from array', t => {
-  const arr = new ArrayFixed([,1,,1,,1,,]);
+  const arr = new ArrayFixed([ ,1, ,1, ,1, ,]);
   t.is(arr.length, 7);
   t.is(arr.count, 3);
 });
@@ -16,11 +16,11 @@ test('setting elements', t => {
 
 test('truncation', t => {
   let arr;
-  arr = new ArrayFixed([1,2,3,,,,]);
+  arr = new ArrayFixed([1,2,3, , , ,]);
   arr.truncateLeft(3);
   t.is(arr.length, 3);
   t.is(arr.count, 0);
-  arr = new ArrayFixed([1,2,3,,,,]);
+  arr = new ArrayFixed([1,2,3, , , ,]);
   arr.truncateRight(3);
   t.is(arr.length, 3);
   t.is(arr.count, 3);
@@ -70,7 +70,7 @@ test('slice', t => {
 });
 
 test('splice', t => {
-  const arr = new ArrayFixed([1,2,,4,5,,]);
+  const arr = new ArrayFixed([1,2, ,4,5, ,]);
   t.is(arr.count, 4);
   t.throws(() => {
     arr.splice(2, 0, 3);
@@ -81,7 +81,7 @@ test('splice', t => {
 });
 
 test('map', t => {
-  const arr = new ArrayFixed([1,2,,4,5,,]);
+  const arr = new ArrayFixed([1,2, ,4,5, ,]);
   const arrM = arr.map((number, index) => {
     return number.toString();
   });
@@ -90,8 +90,90 @@ test('map', t => {
 });
 
 test('findIndex', t => {
-  const arr = new ArrayFixed([1,2,,4,5,,]);
+  const arr = new ArrayFixed([1,2, ,4,5, ,]);
   t.is(arr.findIndex((e) => e === undefined), 2);
   t.is(arr.findIndex((e) => e === 1), 0);
   t.is(arr.findIndex((e) => e === 5), 4);
+});
+
+test('caret', t => {
+  let arr;
+  let origLength;
+  // left caret
+  arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  origLength = arr.length;
+  arr.caretLeft(3, 10);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,10,4, ,5]);
+  // right caret
+  arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  origLength = arr.length;
+  arr.caretRight(3, 10);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1, ,2,10,3,4,5]);
+  // caret preferred left
+  arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  origLength = arr.length;
+  arr.caret(3, 10, true);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,10,4, ,5]);
+  // caret preferred right
+  arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  origLength = arr.length;
+  arr.caret(3, 10, false);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1, ,2,10,3,4,5]);
+  // caret preferred left, with right caret succeeding
+  arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  origLength = arr.length;
+  arr.caret(4, 10, true);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1, ,2,3,10,4,5]);
+  // caret preferred right, with left caret succeeding
+  arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  origLength = arr.length;
+  arr.caret(2, 10, false);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,10,3,4, ,5]);
+  // caret into empty array should succeed
+  arr = new ArrayFixed([ , , ,]);
+  origLength = arr.length;
+  arr.caret(1, 10);
+  arr.caret(0, 10);
+  arr.caret(2, 10);
+  t.is(arr.length, origLength);
+  // caret into a full array should fail
+  t.throws(() => {
+    arr.caret(1, 10);
+  }, RangeError);
+  t.throws(() => {
+    arr.caretLeft(1, 10);
+  }, RangeError);
+  t.throws(() => {
+    arr.caretRight(1, 10);
+  }, RangeError);
+  // caret left fails when left is dense
+  arr = new ArrayFixed([1,2, ,]);
+  t.throws(() => {
+    arr.caretLeft(1, 10);
+  }, RangeError);
+  // caret right fails when right is dense
+  arr = new ArrayFixed([ ,2,3]);
+  t.throws(() => {
+    arr.caretRight(1, 10);
+  }, RangeError);
+  // out of bounds index should fail
+  arr = new ArrayFixed([ ,2, ,]);
+  t.throws(() => {
+    arr.caretRight(10, 10);
+  }, RangeError);
+  t.deepEqual(arr.toArray(), [ ,2, ,]);
+  t.throws(() => {
+    arr.caretLeft(-10, 10);
+  }, RangeError);
+  t.deepEqual(arr.toArray(), [ ,2, ,]);
+  t.throws(() => {
+    arr.caret(100, 10);
+  }, RangeError);
+  t.deepEqual(arr.toArray(), [ ,2, ,]);
 });

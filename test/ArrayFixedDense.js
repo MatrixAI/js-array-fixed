@@ -159,3 +159,75 @@ test('findIndex', t => {
   t.is(arr.findIndex((e) => e === 1), 2);
   t.is(arr.findIndex((e) => e === 5), 5);
 });
+
+test('caret', t => {
+  let arr;
+  let origLength;
+  let origCount;
+  // caret left works as long as there's an empty slot
+  arr = new ArrayFixedDense([1,2,3,4, , ,], true);
+  origLength = arr.length;
+  origCount = arr.count;
+  arr.caretLeft(4, 5);
+  t.is(arr.count, origCount + 1);
+  arr.caretRight(5, 6);
+  t.is(arr.count, origCount + 2);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,4,5,6]);
+  // caret right works as long as there's an empty slot
+  arr = new ArrayFixedDense([ , ,3,4,5,6], false);
+  origCount = arr.count;
+  origLength = arr.length;
+  arr.caretRight(1, 2);
+  arr.caretLeft(0, 1);
+  t.is(arr.count, origCount + 2);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,4,5,6]);
+  // caret left fails on when left is dense and index is in dense left
+  arr = new ArrayFixedDense([1,2,3,4, , ,], true);
+  origCount = arr.count;
+  origLength = arr.length;
+  t.throws(() => {
+    arr.caretLeft(0, 0);
+  }, RangeError);
+  t.is(arr.count, origCount);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,4, , ,]);
+  // caret right succeeds on dense left
+  arr.caretRight(0, 0);
+  t.is(arr.count, origCount + 1);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [0,1,2,3,4, ,]);
+  // caret right fails on when right is dense and index is in dense right
+  arr = new ArrayFixedDense([ , ,3,4,5,6], false);
+  origCount = arr.count;
+  origLength = arr.length;
+  t.throws(() => {
+    arr.caretRight(5, 7);
+  }, RangeError);
+  t.is(arr.count, origCount);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [ , ,3,4,5,6]);
+  // caret left succeeds on dense right
+  arr.caretLeft(5, 7);
+  t.is(arr.count, origCount + 1);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [ ,3,4,5,6,7]);
+  // we can try caret without worrying about direction
+  arr = new ArrayFixedDense([3,4,5, , ,], true);
+  origCount = arr.count;
+  origLength = arr.length;
+  arr.caret(0, 2);
+  arr.caret(0, 1);
+  t.is(arr.count, origCount + 2);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,4,5]);
+  arr = new ArrayFixedDense([ , ,1,2,3], false);
+  origCount = arr.count;
+  origLength = arr.length;
+  arr.caret(4, 4);
+  arr.caret(4, 5);
+  t.is(arr.count, origCount + 2);
+  t.is(arr.length, origLength);
+  t.deepEqual(arr.toArray(), [1,2,3,4,5]);
+});
