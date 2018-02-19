@@ -593,8 +593,26 @@ var _classof = function (it) {
 
 var ITERATOR$1 = _wks('iterator');
 
+var core_isIterable = _core.isIterable = function (it) {
+  var O = Object(it);
+  return O[ITERATOR$1] !== undefined
+    || '@@iterator' in O
+    // eslint-disable-next-line no-prototype-builtins
+    || _iterators.hasOwnProperty(_classof(O));
+};
+
+var isIterable$2 = core_isIterable;
+
+var isIterable = createCommonjsModule(function (module) {
+module.exports = { "default": isIterable$2, __esModule: true };
+});
+
+unwrapExports(isIterable);
+
+var ITERATOR$2 = _wks('iterator');
+
 var core_getIteratorMethod = _core.getIteratorMethod = function (it) {
-  if (it != undefined) return it[ITERATOR$1]
+  if (it != undefined) return it[ITERATOR$2]
     || it['@@iterator']
     || _iterators[_classof(it)];
 };
@@ -612,6 +630,60 @@ module.exports = { "default": getIterator$1, __esModule: true };
 });
 
 var _getIterator = unwrapExports(getIterator);
+
+var slicedToArray = createCommonjsModule(function (module, exports) {
+exports.__esModule = true;
+
+
+
+var _isIterable3 = _interopRequireDefault(isIterable);
+
+
+
+var _getIterator3 = _interopRequireDefault(getIterator);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = (0, _getIterator3.default)(arr), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if ((0, _isIterable3.default)(Object(arr))) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+});
+
+var _slicedToArray = unwrapExports(slicedToArray);
 
 var f$1 = _wks;
 
@@ -731,6 +803,7 @@ var ArrayFixed = function () {
       this._array = new Array(sizeOrArray);
     } else {
       var count = 0;
+      // $FlowFixMe: Arrays are objects
       _Object$keys(sizeOrArray).map(function () {
         ++count;
       });
@@ -779,7 +852,6 @@ var ArrayFixed = function () {
       } else {
         this._array[index] = value;
       }
-      return;
     }
   }, {
     key: 'unset',
@@ -839,6 +911,7 @@ var ArrayFixed = function () {
       if (arguments.length === 1) {
         deleteCount = this._array.length - indexStart;
       } else {
+        // $FlowFixMe: cast nully to 0
         deleteCount = deleteCount | 0;
       }
       if (deleteCount !== items.length) {
@@ -872,6 +945,7 @@ var ArrayFixed = function () {
     value: function collapseLeft() {
       var _this = this;
 
+      // $FlowFixMe: Arrays are objects
       var arrayNew = _Object$keys(this._array).map(function (k) {
         return _this._array[k];
       });
@@ -883,6 +957,7 @@ var ArrayFixed = function () {
     value: function collapseRight() {
       var _this2 = this;
 
+      // $FlowFixMe: Arrays are objects
       var arrayNew = _Object$keys(this._array).map(function (k) {
         return _this2._array[k];
       });
@@ -894,6 +969,7 @@ var ArrayFixed = function () {
       if (length < this._array.length) {
         var truncated = this._array.splice(0, this._array.length - length);
         var count = 0;
+        // $FlowFixMe: Arrays are objects
         _Object$keys(truncated).map(function () {
           ++count;
         });
@@ -909,6 +985,7 @@ var ArrayFixed = function () {
       if (length < this._array.length) {
         var truncated = this._array.splice(length);
         var count = 0;
+        // $FlowFixMe: Arrays are objects
         _Object$keys(truncated).map(function () {
           ++count;
         });
@@ -916,6 +993,160 @@ var ArrayFixed = function () {
       } else {
         this._array.length = length;
       }
+      return;
+    }
+  }, {
+    key: 'caretLeft',
+    value: function caretLeft(index, value) {
+      if (index >= this._array.length || index < 0) {
+        throw new RangeError('Out of range index');
+      }
+      if (this._count === this._array.length) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      if (!this._array.hasOwnProperty(index)) {
+        this._array[index] = value;
+        ++this._count;
+        return;
+      }
+      var emptyIndex = null;
+      for (var i = index - 1; i >= 0; --i) {
+        if (!this._array.hasOwnProperty(i)) {
+          emptyIndex = i;
+          break;
+        }
+      }
+      if (emptyIndex === null) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      this._array.copyWithin(emptyIndex, emptyIndex + 1, index + 1);
+      this._array[index] = value;
+      ++this._count;
+      return;
+    }
+  }, {
+    key: 'caretRight',
+    value: function caretRight(index, value) {
+      if (index >= this._array.length || index < 0) {
+        throw new RangeError('Out of range index');
+      }
+      if (this._count === this._array.length) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      if (!this._array.hasOwnProperty(index)) {
+        this._array[index] = value;
+        ++this._count;
+        return;
+      }
+      var emptyIndex = null;
+      for (var i = index + 1; i < this._array.length; ++i) {
+        if (!this._array.hasOwnProperty(i)) {
+          emptyIndex = i;
+          break;
+        }
+      }
+      if (emptyIndex === null) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      this._array.copyWithin(index + 1, index, emptyIndex);
+      this._array[index] = value;
+      ++this._count;
+      return;
+    }
+  }, {
+    key: 'caret',
+    value: function caret(index, value) {
+      var preferredDirection = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+      if (index >= this._array.length || index < 0) {
+        throw new RangeError('Out of range index');
+      }
+      if (this._count === this._array.length) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      if (!this._array.hasOwnProperty(index)) {
+        this._array[index] = value;
+        ++this._count;
+        return;
+      }
+      var emptyDirectionAndIndex = null;
+      var i = index - 1,
+          j = index + 1;
+      if (preferredDirection) {
+        while (true) {
+          if (i >= 0 && j < this._array.length) {
+            if (!this._array.hasOwnProperty(i)) {
+              emptyDirectionAndIndex = [true, i];
+              break;
+            }
+            if (!this._array.hasOwnProperty(j)) {
+              emptyDirectionAndIndex = [false, j];
+              break;
+            }
+            --i;
+            ++j;
+          } else if (i >= 0) {
+            if (!this._array.hasOwnProperty(i)) {
+              emptyDirectionAndIndex = [true, i];
+              break;
+            }
+            --i;
+          } else if (j < this._array.length) {
+            if (!this._array.hasOwnProperty(j)) {
+              emptyDirectionAndIndex = [false, j];
+              break;
+            }
+            ++j;
+          } else {
+            break;
+          }
+        }
+      } else {
+        while (true) {
+          if (i >= 0 && j < this._array.length) {
+            if (!this._array.hasOwnProperty(j)) {
+              emptyDirectionAndIndex = [false, j];
+              break;
+            }
+            if (!this._array.hasOwnProperty(i)) {
+              emptyDirectionAndIndex = [true, i];
+              break;
+            }
+            --i;
+            ++j;
+          } else if (i >= 0) {
+            if (!this._array.hasOwnProperty(i)) {
+              emptyDirectionAndIndex = [true, i];
+              break;
+            }
+            --i;
+          } else if (j < this._array.length) {
+            if (!this._array.hasOwnProperty(j)) {
+              emptyDirectionAndIndex = [false, j];
+              break;
+            }
+            ++j;
+          } else {
+            break;
+          }
+        }
+      }
+      if (!emptyDirectionAndIndex) {
+        throw new RangeError('Careting would result in overflow');
+      }
+
+      var _emptyDirectionAndInd = emptyDirectionAndIndex,
+          _emptyDirectionAndInd2 = _slicedToArray(_emptyDirectionAndInd, 2),
+          emptyDirection = _emptyDirectionAndInd2[0],
+          emptyIndex = _emptyDirectionAndInd2[1];
+
+      if (emptyDirection) {
+        this._array.copyWithin(emptyIndex, emptyIndex + 1, index + 1);
+      } else {
+        this._array.copyWithin(index + 1, index, emptyIndex);
+      }
+      this._array[index] = value;
+      ++this._count;
       return;
     }
   }, {
@@ -1572,6 +1803,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
     _classCallCheck(this, ArrayFixedDense);
 
     if (Array.isArray(sizeOrArray)) {
+      // $FlowFixMe: Arrays are objects
       var arrayNew = _Object$keys(sizeOrArray).map(function (k) {
         return sizeOrArray[k];
       });
@@ -1658,15 +1890,25 @@ var ArrayFixedDense = function (_ArrayFixed) {
         swapMid = Math.floor(this._count / 2);
         for (var i = swapStart; i < swapMid; ++i) {
           var _ref = [this._array[this._count - i - 1], this._array[i]];
+
+          // $FlowFixMe: Destructuring swap
           this._array[i] = _ref[0];
+
+          // $FlowFixMe: Destructuring swap
           this._array[this._count - i - 1] = _ref[1];
         }
       } else {
         swapStart = this._array.length - this._count;
         swapMid = Math.floor(this._count / 2) + swapStart;
         for (var _i = swapStart; _i < swapMid; ++_i) {
-          var _ref2 = [this._array[this._array.length - _i + swapStart - 1], this._array[_i]];
+          var _ref2 = [
+          // $FlowFixMe: Destructuring swap
+          this._array[this._array.length - _i + swapStart - 1], this._array[_i]];
+
+          // $FlowFixMe: Destructuring swap
           this._array[_i] = _ref2[0];
+
+          // $FlowFixMe: Destructuring swap
           this._array[this._array.length - _i + swapStart - 1] = _ref2[1];
         }
       }
@@ -1716,6 +1958,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
       if (arguments.length === 1) {
         deleteCount = this._array.length - indexStart;
       } else {
+        // $FlowFixMe: cast nully to 0
         deleteCount = deleteCount | 0;
       }
       if (deleteCount !== items.length) {
@@ -1738,9 +1981,80 @@ var ArrayFixedDense = function (_ArrayFixed) {
       });
       return ArrayFixedDense.fromArray(arrayNew, this._count, this._direction);
     }
+  }, {
+    key: 'caretLeft',
+    value: function caretLeft(index, value) {
+      if (index >= this._array.length || index < 0) {
+        throw new RangeError('Out of range index');
+      }
+      // if the array is full
+      // or that the index is within the dense left partition
+      // then the array would overflow
+      if (this._count === this._array.length || this._direction && index < this._count) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      // we use this.set to make sure density is ensured
+      if (!this._array.hasOwnProperty(index)) {
+        // ensure density
+        if (this._direction) {
+          index = this._count;
+        } else {
+          index = this._array.length - this._count - 1;
+        }
+      } else {
+        // at this point the this._direction must be false
+        // we can memmove left and set
+        var emptyIndex = this._array.length - this._count - 1;
+        this._array.copyWithin(emptyIndex, emptyIndex + 1, index + 1);
+      }
+      this._array[index] = value;
+      ++this._count;
+      return;
+    }
+  }, {
+    key: 'caretRight',
+    value: function caretRight(index, value) {
+      if (index >= this._array.length || index < 0) {
+        throw new RangeError('Out of range index');
+      }
+      // if the array is full
+      // or that the index is within the dense right partition
+      // then the array would overflow
+      if (this._count === this._array.length || !this._direction && index >= this._array.length - this._count) {
+        throw new RangeError('Careting would result in overflow');
+      }
+      if (!this._array.hasOwnProperty(index)) {
+        // ensure density
+        if (this._direction) {
+          index = this._count;
+        } else {
+          index = this._array.length - this._count - 1;
+        }
+      } else {
+        // at this point the this._direction must be true
+        // we can memmove right and set
+        var emptyIndex = this._count + 1;
+        this._array.copyWithin(index + 1, index, emptyIndex);
+      }
+      this._array[index] = value;
+      ++this._count;
+      return;
+    }
+  }, {
+    key: 'caret',
+    value: function caret(index, value) {
+      // the preferred direction is the opposite direction of this dense array
+      if (this._direction) {
+        return this.caretRight(index, value);
+      } else {
+        return this.caretLeft(index, value);
+      }
+    }
   }], [{
     key: 'fromArray',
-    value: function fromArray(array, count, direction) {
+    value: function fromArray(array, count) {
+      var direction = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
       var arrayFixedDense = new ArrayFixedDense(array.length);
       arrayFixedDense._array = array;
       arrayFixedDense._count = count;
