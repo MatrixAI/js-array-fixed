@@ -150,9 +150,12 @@ class ArrayFixed {
   }
 
   map(callback) {
-    const arrayNew = this._array.map((v, i) => callback(v, i));
-
+    const arrayNew = this._array.map((v, i) => callback(v, i, this));
     return ArrayFixed.fromArray(arrayNew, this._count);
+  }
+
+  forEach(callback) {
+    this._array.forEach((v, i) => callback(v, i, this));
   }
 
   findIndex(callback) {
@@ -362,11 +365,11 @@ class ArrayFixed {
  */
 class ArrayFixedDense extends ArrayFixed {
 
-  constructor(sizeOrArray = 0, direction = true) {
+  constructor(sizeOrArray = 0, direction_ = true) {
     if (Array.isArray(sizeOrArray)) {
       // $FlowFixMe: Arrays are objects
       const arrayNew = _Object$keys(sizeOrArray).map(k => sizeOrArray[k]);
-      if (direction) {
+      if (direction_) {
         arrayNew.length = sizeOrArray.length;
         sizeOrArray = arrayNew;
       } else {
@@ -374,7 +377,7 @@ class ArrayFixedDense extends ArrayFixed {
       }
     }
     super(sizeOrArray);
-    this._direction = direction;
+    this._direction = direction_;
   }
 
   /**
@@ -382,11 +385,11 @@ class ArrayFixedDense extends ArrayFixed {
    * This skips the integrity process in the normal constructor.
    * The array must already be dense, and have the correct count and direction.
    */
-  static fromArray(array, count, direction = true) {
+  static fromArray(array, count, direction_ = true) {
     const arrayFixedDense = new ArrayFixedDense(array.length);
     arrayFixedDense._array = array;
     arrayFixedDense._count = count;
-    arrayFixedDense._direction = direction;
+    arrayFixedDense._direction = direction_;
     return arrayFixedDense;
   }
 
@@ -394,15 +397,23 @@ class ArrayFixedDense extends ArrayFixed {
     return this._direction;
   }
 
-  switchDirection(direction) {
-    if (direction !== this._direction) {
-      if (direction) {
+  switchDirection(direction_) {
+    if (direction_ !== this._direction) {
+      if (direction_) {
         super.collapseLeft();
       } else {
         super.collapseRight();
       }
-      this._direction = direction;
+      this._direction = direction_;
     }
+  }
+
+  collapseLeft() {
+    return;
+  }
+
+  collapseRight() {
+    return;
   }
 
   set(index, value) {
@@ -527,8 +538,12 @@ class ArrayFixedDense extends ArrayFixed {
   }
 
   map(callback) {
-    const arrayNew = this._array.map((v, i) => callback(v, i));
+    const arrayNew = this._array.map((v, i) => callback(v, i, this));
     return ArrayFixedDense.fromArray(arrayNew, this._count, this._direction);
+  }
+
+  forEach(callback) {
+    this._array.forEach((v, i) => callback(v, i, this));
   }
 
   caretLeft(index, value) {
