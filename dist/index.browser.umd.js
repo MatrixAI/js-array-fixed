@@ -2050,6 +2050,11 @@ var ArrayFixedDense = function (_ArrayFixed) {
         return this.caretLeft(index, value);
       }
     }
+  }, {
+    key: 'direction',
+    get: function get() {
+      return this._direction;
+    }
   }], [{
     key: 'fromArray',
     value: function fromArray(array, count) {

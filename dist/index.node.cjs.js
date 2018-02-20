@@ -390,6 +390,10 @@ class ArrayFixedDense extends ArrayFixed {
     return arrayFixedDense;
   }
 
+  get direction() {
+    return this._direction;
+  }
+
   switchDirection(direction) {
     if (direction !== this._direction) {
       if (direction) {
