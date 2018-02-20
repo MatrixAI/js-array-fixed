@@ -19,6 +19,34 @@ test('construction from array', t => {
   );
 });
 
+test('collapsing should not affect a dense array', t => {
+  let arr;
+  arr = new ArrayFixedDense([1,2,3, , ,], true);
+  arr.collapseLeft();
+  t.deepEqual(arr.toArray(), [1,2,3, , ,]);
+  arr.collapseRight();
+  t.deepEqual(arr.toArray(), [1,2,3, , ,]);
+  arr = new ArrayFixedDense([ , ,4,5,6], false);
+  arr.collapseLeft();
+  t.deepEqual(arr.toArray(), [ , ,4,5,6]);
+  arr.collapseRight();
+  t.deepEqual(arr.toArray(), [ , ,4,5,6]);
+});
+
+test('can switch direction', t => {
+  let arr;
+  arr = new ArrayFixedDense([1,2,3, , ,], true);
+  arr.switchDirection(false);
+  t.deepEqual(arr.toArray(), [ , ,1,2,3]);
+  arr.switchDirection(true);
+  t.deepEqual(arr.toArray(), [1,2,3, , ,]);
+  arr = new ArrayFixedDense([ , ,4,5,6], false);
+  arr.switchDirection(true);
+  t.deepEqual(arr.toArray(), [4,5,6, , ,]);
+  arr.switchDirection(false);
+  t.deepEqual(arr.toArray(), [ , ,4,5,6]);
+});
+
 test('setting elements', t => {
   let arr;
   arr = new ArrayFixedDense([1,2,3, , ,]);
