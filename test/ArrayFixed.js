@@ -1,6 +1,13 @@
 import test from 'ava';
 import ArrayFixed from '../lib/ArrayFixed.js';
 
+test('construction from length number', t => {
+  let arr;
+  arr = new ArrayFixed(100);
+  t.is(arr.length, 100);
+  t.is(arr.count, 0);
+});
+
 test('construction from array', t => {
   const arr = new ArrayFixed([ ,1, ,1, ,1, ,]);
   t.is(arr.length, 7);
