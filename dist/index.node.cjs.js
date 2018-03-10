@@ -5,6 +5,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var _slicedToArray = _interopDefault(require('babel-runtime/helpers/slicedToArray'));
+var _Math$trunc = _interopDefault(require('babel-runtime/core-js/math/trunc'));
 var _getIterator = _interopDefault(require('babel-runtime/core-js/get-iterator'));
 var _Symbol$iterator = _interopDefault(require('babel-runtime/core-js/symbol/iterator'));
 var _Object$keys = _interopDefault(require('babel-runtime/core-js/object/keys'));
@@ -104,9 +105,9 @@ class ArrayFixed {
     return this;
   }
 
-  slice(begin, end) {
-    if (begin == null) begin = 0;
-    if (end == null) end = this._array.length;
+  slice(begin = 0, end = this._array.length) {
+    begin = _Math$trunc(begin);
+    end = _Math$trunc(end);
     if (begin < 0) {
       begin = Math.max(begin + this._array.length, 0);
     }
@@ -122,7 +123,8 @@ class ArrayFixed {
     return ArrayFixed.fromArray(this._array.slice(begin, end), count);
   }
 
-  splice(indexStart, deleteCount, ...items) {
+  splice(indexStart = 0, deleteCount, ...items) {
+    indexStart = _Math$trunc(indexStart);
     // bound indexStart according to splice behaviour
     if (indexStart > this._array.length) {
       indexStart = this._array.length;
@@ -133,7 +135,7 @@ class ArrayFixed {
     if (arguments.length === 1) {
       deleteCount = this._array.length - indexStart;
     } else {
-      // $FlowFixMe: cast nully to 0
+      // $FlowFixMe: casts nully to 0 AND also truncates to integer
       deleteCount = deleteCount | 0;
     }
     if (deleteCount !== items.length) {
@@ -486,9 +488,9 @@ class ArrayFixedDense extends ArrayFixed {
     return this;
   }
 
-  slice(begin, end) {
-    if (begin == null) begin = 0;
-    if (end == null) end = this._array.length;
+  slice(begin = 0, end = this._array.length) {
+    begin = _Math$trunc(begin);
+    end = _Math$trunc(end);
     if (begin < 0) {
       begin = Math.max(begin + this._array.length, 0);
     }
@@ -504,7 +506,8 @@ class ArrayFixedDense extends ArrayFixed {
     return ArrayFixedDense.fromArray(this._array.slice(begin, end), count, this._direction);
   }
 
-  splice(indexStart, deleteCount, ...items) {
+  splice(indexStart = 0, deleteCount, ...items) {
+    indexStart = _Math$trunc(indexStart);
     if (indexStart < 0) {
       indexStart = Math.max(indexStart + this._array.length, 0);
     }
@@ -521,7 +524,7 @@ class ArrayFixedDense extends ArrayFixed {
     if (arguments.length === 1) {
       deleteCount = this._array.length - indexStart;
     } else {
-      // $FlowFixMe: cast nully to 0
+      // $FlowFixMe: casts nully to 0 AND also truncates to integer
       deleteCount = deleteCount | 0;
     }
     if (deleteCount !== items.length) {

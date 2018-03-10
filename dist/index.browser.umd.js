@@ -685,6 +685,23 @@ exports.default = function () {
 
 var _slicedToArray = unwrapExports(slicedToArray);
 
+// 20.2.2.34 Math.trunc(x)
+
+
+_export(_export.S, 'Math', {
+  trunc: function trunc(it) {
+    return (it > 0 ? Math.floor : Math.ceil)(it);
+  }
+});
+
+var trunc$1 = _core.Math.trunc;
+
+var trunc = createCommonjsModule(function (module) {
+module.exports = { "default": trunc$1, __esModule: true };
+});
+
+var _Math$trunc = unwrapExports(trunc);
+
 var f$1 = _wks;
 
 var _wksExt = {
@@ -875,9 +892,12 @@ var ArrayFixed = function () {
     }
   }, {
     key: 'slice',
-    value: function slice(begin, end) {
-      if (begin == null) begin = 0;
-      if (end == null) end = this._array.length;
+    value: function slice() {
+      var begin = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._array.length;
+
+      begin = _Math$trunc(begin);
+      end = _Math$trunc(end);
       if (begin < 0) {
         begin = Math.max(begin + this._array.length, 0);
       }
@@ -894,13 +914,17 @@ var ArrayFixed = function () {
     }
   }, {
     key: 'splice',
-    value: function splice(indexStart, deleteCount) {
+    value: function splice() {
       for (var _len = arguments.length, items = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         items[_key - 2] = arguments[_key];
       }
 
       var _array;
 
+      var indexStart = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var deleteCount = arguments[1];
+
+      indexStart = _Math$trunc(indexStart);
       // bound indexStart according to splice behaviour
       if (indexStart > this._array.length) {
         indexStart = this._array.length;
@@ -911,7 +935,7 @@ var ArrayFixed = function () {
       if (arguments.length === 1) {
         deleteCount = this._array.length - indexStart;
       } else {
-        // $FlowFixMe: cast nully to 0
+        // $FlowFixMe: casts nully to 0 AND also truncates to integer
         deleteCount = deleteCount | 0;
       }
       if (deleteCount !== items.length) {
@@ -1936,9 +1960,12 @@ var ArrayFixedDense = function (_ArrayFixed) {
     }
   }, {
     key: 'slice',
-    value: function slice(begin, end) {
-      if (begin == null) begin = 0;
-      if (end == null) end = this._array.length;
+    value: function slice() {
+      var begin = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._array.length;
+
+      begin = _Math$trunc(begin);
+      end = _Math$trunc(end);
       if (begin < 0) {
         begin = Math.max(begin + this._array.length, 0);
       }
@@ -1955,13 +1982,17 @@ var ArrayFixedDense = function (_ArrayFixed) {
     }
   }, {
     key: 'splice',
-    value: function splice(indexStart, deleteCount) {
+    value: function splice() {
       for (var _len = arguments.length, items = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         items[_key - 2] = arguments[_key];
       }
 
       var _array;
 
+      var indexStart = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var deleteCount = arguments[1];
+
+      indexStart = _Math$trunc(indexStart);
       if (indexStart < 0) {
         indexStart = Math.max(indexStart + this._array.length, 0);
       }
@@ -1978,7 +2009,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
       if (arguments.length === 1) {
         deleteCount = this._array.length - indexStart;
       } else {
-        // $FlowFixMe: cast nully to 0
+        // $FlowFixMe: casts nully to 0 AND also truncates to integer
         deleteCount = deleteCount | 0;
       }
       if (deleteCount !== items.length) {
