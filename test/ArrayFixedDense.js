@@ -26,6 +26,15 @@ test('construction from array', t => {
   );
 });
 
+test('construction from static fromArray', t => {
+  let arr;
+  const children = [1,2];
+  children.length = 10;
+  arr = ArrayFixedDense.fromArray(children, 2, true);
+  t.is(arr.count, 2);
+  t.is(arr.length, 10);
+});
+
 test('collapsing should not affect a dense array', t => {
   let arr;
   arr = new ArrayFixedDense([1,2,3, , ,], true);
@@ -133,6 +142,9 @@ test('slice', t => {
   t.deepEqual(slice.toArray(), []);
   slice = arr.slice(arr.length);
   t.deepEqual(slice.toArray(), []);
+  // slice will truncate floats
+  slice = arr.slice(1.5, 2.5);
+  t.deepEqual(slice.toArray(), [2]);
   arr = new ArrayFixedDense([ , ,1,2,3,4], false);
   slice = arr.slice(0, arr.count / 2);
   t.deepEqual(slice.toArray(), [ , ,]);
@@ -150,6 +162,9 @@ test('slice', t => {
   t.deepEqual(slice.toArray(), []);
   slice = arr.slice(arr.length);
   t.deepEqual(slice.toArray(), []);
+  // slice will truncate floats
+  slice = arr.slice(4.5, 5.5);
+  t.deepEqual(slice.toArray(), [3]);
 });
 
 test('splice', t => {
@@ -162,6 +177,17 @@ test('splice', t => {
   arr.splice(0, 1, 0);
   t.is(arr.count, 5);
   t.deepEqual(arr.toArray(), [ ,0,1,2,3,4]);
+  let spliced;
+  // splice will truncate floats
+  arr = new ArrayFixedDense([1,2,3,4, , ,]);
+  spliced = arr.splice(1.5, 2.5, 2, 3);
+  t.deepEqual([...spliced], [2,3]);
+  t.deepEqual([...arr], [1,2,3,4, , ,]);
+  // splice defaults to 0 for starting index
+  arr = new ArrayFixedDense([1,2,3,4, , ,]);
+  spliced = arr.splice(null, arr.length, 1, 2, 3, 4, 5, 6);
+  t.deepEqual([...spliced], [1,2,3,4, , ,]);
+  t.deepEqual([...arr], [1,2,3,4,5,6]);
 });
 
 test('reverse', t => {

@@ -14,6 +14,15 @@ test('construction from array', t => {
   t.is(arr.count, 3);
 });
 
+test('construction from static fromArray', t => {
+  let arr;
+  const children = [1,2];
+  children.length = 10;
+  arr = ArrayFixed.fromArray(children, 2);
+  t.is(arr.count, 2);
+  t.is(arr.length, 10);
+});
+
 test('setting elements', t => {
   const arr = new ArrayFixed(10);
   arr.set(0, 1);
@@ -74,10 +83,14 @@ test('slice', t => {
   t.deepEqual(slice.toArray(), []);
   slice = arr.slice(arr.length);
   t.deepEqual(slice.toArray(), []);
+  // slice will truncate floats
+  slice = arr.slice(1.5, 2.5);
+  t.deepEqual(slice.toArray(), [2]);
 });
 
 test('splice', t => {
-  const arr = new ArrayFixed([1,2, ,4,5, ,]);
+  let arr;
+  arr = new ArrayFixed([1,2, ,4,5, ,]);
   t.is(arr.count, 4);
   t.throws(() => {
     arr.splice(2, 0, 3);
@@ -85,6 +98,17 @@ test('splice', t => {
   arr.splice(2, 1, 3);
   t.deepEqual([...arr], [1, 2, 3, 4, 5, undefined]);
   t.is(arr.count, 5);
+  let spliced;
+  // splice will truncate floats
+  arr = new ArrayFixed([1,2, ,4,5, ,]);
+  spliced = arr.splice(1.5, 2.5, 2, 3);
+  t.deepEqual([...spliced], [2, ,]);
+  t.deepEqual([...arr], [1,2,3,4,5, ,]);
+  // splice defaults to 0 for starting index
+  arr = new ArrayFixed([1,2, ,4,5, ,]);
+  spliced = arr.splice(null, arr.length, 1, 2, 3, 4, 5, 6);
+  t.deepEqual([...spliced], [1,2, , 4,5, ,]);
+  t.deepEqual([...arr], [1,2,3,4,5,6]);
 });
 
 test('map', t => {
