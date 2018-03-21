@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset='utf-8' />
-  <title>array-fixed 0.5.0 | Documentation</title>
+  <title>array-fixed 0.5.1 | Documentation</title>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' type='text/css' rel='stylesheet' />
   <link href='assets/style.css' type='text/css' rel='stylesheet' />
@@ -14,7 +14,7 @@
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>array-fixed</h3>
-          <div class='mb1'><code>0.5.0</code></div>
+          <div class='mb1'><code>0.5.1</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -458,7 +458,7 @@ The array must have the correct count.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>fromArray(array, count, direction_)</span>
+            <span class='code strong strong truncate'>fromArray(array, count, direction)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -471,7 +471,7 @@ This skips the integrity process in the normal constructor.
 The array must already be dense, and have the correct count and direction.</p>
 
 
-  <div class='pre p1 fill-light mt0'>fromArray(array: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>, count: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, direction_: direction): <a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item, direction></div>
+  <div class='pre p1 fill-light mt0'>fromArray(array: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>, count: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, direction: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>): <a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item></div>
   
   
 
@@ -504,7 +504,7 @@ The array must already be dense, and have the correct count and direction.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>direction_</span> <code class='quiet'>(direction
+            <span class='code bold'>direction</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
             = <code>true</code>)</code>
 	    
           </div>
@@ -519,7 +519,7 @@ The array must already be dense, and have the correct count and direction.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item, direction></code>
+      <code><a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item></code>
     
   
 
@@ -566,7 +566,7 @@ The array must already be dense, and have the correct count and direction.</p>
 This ensures that mutation always results in a dense array.</p>
 
 
-  <div class='pre p1 fill-light mt0'>new ArrayFixedDense(sizeOrArray: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>), direction_: direction)</div>
+  <div class='pre p1 fill-light mt0'>new ArrayFixedDense(sizeOrArray: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>), direction: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</div>
   
   
     <p>
@@ -599,7 +599,7 @@ This ensures that mutation always results in a dense array.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>direction_</span> <code class='quiet'>(direction
+            <span class='code bold'>direction</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
             = <code>true</code>)</code>
 	    
           </div>
@@ -625,7 +625,7 @@ This ensures that mutation always results in a dense array.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>fromArray(array, count, direction_)</span>
+            <span class='code strong strong truncate'>fromArray(array, count, direction)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -638,7 +638,7 @@ This skips the integrity process in the normal constructor.
 The array must already be dense, and have the correct count and direction.</p>
 
 
-  <div class='pre p1 fill-light mt0'>fromArray(array: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>, count: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, direction_: direction): <a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item, direction></div>
+  <div class='pre p1 fill-light mt0'>fromArray(array: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;item>, count: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, direction: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>): <a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item></div>
   
   
 
@@ -671,7 +671,7 @@ The array must already be dense, and have the correct count and direction.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>direction_</span> <code class='quiet'>(direction
+            <span class='code bold'>direction</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
             = <code>true</code>)</code>
 	    
           </div>
@@ -686,7 +686,7 @@ The array must already be dense, and have the correct count and direction.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item, direction></code>
+      <code><a href="#arrayfixeddense">ArrayFixedDense</a>&#x3C;item></code>
     
   
 

@@ -211,7 +211,7 @@ class ArrayFixed {
     if (!this._array.hasOwnProperty(index)) {
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
     let emptyIndex = null;
     for (let i = index - 1; i >= 0; --i) {
@@ -226,7 +226,7 @@ class ArrayFixed {
     this._array.copyWithin(emptyIndex, emptyIndex + 1, index + 1);
     this._array[index] = value;
     ++this._count;
-    return;
+    return index;
   }
 
   caretRight(index, value) {
@@ -239,7 +239,7 @@ class ArrayFixed {
     if (!this._array.hasOwnProperty(index)) {
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
     let emptyIndex = null;
     for (let i = index + 1; i < this._array.length; ++i) {
@@ -254,7 +254,7 @@ class ArrayFixed {
     this._array.copyWithin(index + 1, index, emptyIndex);
     this._array[index] = value;
     ++this._count;
-    return;
+    return index;
   }
 
   caret(index, value, preferredDirection = true) {
@@ -267,7 +267,7 @@ class ArrayFixed {
     if (!this._array.hasOwnProperty(index)) {
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
     let emptyDirectionAndIndex = null;
     let i = index - 1,
@@ -348,7 +348,7 @@ class ArrayFixed {
     }
     this._array[index] = value;
     ++this._count;
-    return;
+    return index;
   }
 
 }
@@ -361,11 +361,11 @@ class ArrayFixed {
  */
 class ArrayFixedDense extends ArrayFixed {
 
-  constructor(sizeOrArray = 0, direction_ = true) {
+  constructor(sizeOrArray = 0, direction = true) {
     if (Array.isArray(sizeOrArray)) {
       // $FlowFixMe: Arrays are objects
       const arrayNew = _Object$keys(sizeOrArray).map(k => sizeOrArray[k]);
-      if (direction_) {
+      if (direction) {
         arrayNew.length = sizeOrArray.length;
         sizeOrArray = arrayNew;
       } else {
@@ -373,7 +373,7 @@ class ArrayFixedDense extends ArrayFixed {
       }
     }
     super(sizeOrArray);
-    this._direction = direction_;
+    this._direction = direction;
   }
 
   /**
@@ -381,11 +381,11 @@ class ArrayFixedDense extends ArrayFixed {
    * This skips the integrity process in the normal constructor.
    * The array must already be dense, and have the correct count and direction.
    */
-  static fromArray(array, count, direction_ = true) {
+  static fromArray(array, count, direction = true) {
     const arrayFixedDense = new ArrayFixedDense(array.length);
     arrayFixedDense._array = array;
     arrayFixedDense._count = count;
-    arrayFixedDense._direction = direction_;
+    arrayFixedDense._direction = direction;
     return arrayFixedDense;
   }
 
@@ -393,14 +393,14 @@ class ArrayFixedDense extends ArrayFixed {
     return this._direction;
   }
 
-  switchDirection(direction_) {
-    if (direction_ !== this._direction) {
-      if (direction_) {
+  switchDirection(direction) {
+    if (direction !== this._direction) {
+      if (direction) {
         super.collapseLeft();
       } else {
         super.collapseRight();
       }
-      this._direction = direction_;
+      this._direction = direction;
     }
   }
 
@@ -569,7 +569,7 @@ class ArrayFixedDense extends ArrayFixed {
     }
     this._array[index] = value;
     ++this._count;
-    return;
+    return index;
   }
 
   caretRight(index, value) {
@@ -597,7 +597,7 @@ class ArrayFixedDense extends ArrayFixed {
     }
     this._array[index] = value;
     ++this._count;
-    return;
+    return index;
   }
 
   caret(index, value) {

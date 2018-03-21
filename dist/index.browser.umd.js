@@ -1041,7 +1041,7 @@ var ArrayFixed = function () {
       if (!this._array.hasOwnProperty(index)) {
         this._array[index] = value;
         ++this._count;
-        return;
+        return index;
       }
       var emptyIndex = null;
       for (var i = index - 1; i >= 0; --i) {
@@ -1056,7 +1056,7 @@ var ArrayFixed = function () {
       this._array.copyWithin(emptyIndex, emptyIndex + 1, index + 1);
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
   }, {
     key: 'caretRight',
@@ -1070,7 +1070,7 @@ var ArrayFixed = function () {
       if (!this._array.hasOwnProperty(index)) {
         this._array[index] = value;
         ++this._count;
-        return;
+        return index;
       }
       var emptyIndex = null;
       for (var i = index + 1; i < this._array.length; ++i) {
@@ -1085,7 +1085,7 @@ var ArrayFixed = function () {
       this._array.copyWithin(index + 1, index, emptyIndex);
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
   }, {
     key: 'caret',
@@ -1101,7 +1101,7 @@ var ArrayFixed = function () {
       if (!this._array.hasOwnProperty(index)) {
         this._array[index] = value;
         ++this._count;
-        return;
+        return index;
       }
       var emptyDirectionAndIndex = null;
       var i = index - 1,
@@ -1181,7 +1181,7 @@ var ArrayFixed = function () {
       }
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
   }, {
     key: 'length',
@@ -1832,7 +1832,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
 
   function ArrayFixedDense() {
     var sizeOrArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var direction_ = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    var direction = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
     _classCallCheck(this, ArrayFixedDense);
 
@@ -1841,7 +1841,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
       var arrayNew = _Object$keys(sizeOrArray).map(function (k) {
         return sizeOrArray[k];
       });
-      if (direction_) {
+      if (direction) {
         arrayNew.length = sizeOrArray.length;
         sizeOrArray = arrayNew;
       } else {
@@ -1851,7 +1851,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
 
     var _this = _possibleConstructorReturn(this, (ArrayFixedDense.__proto__ || _Object$getPrototypeOf(ArrayFixedDense)).call(this, sizeOrArray));
 
-    _this._direction = direction_;
+    _this._direction = direction;
     return _this;
   }
 
@@ -1864,14 +1864,14 @@ var ArrayFixedDense = function (_ArrayFixed) {
 
   _createClass(ArrayFixedDense, [{
     key: 'switchDirection',
-    value: function switchDirection(direction_) {
-      if (direction_ !== this._direction) {
-        if (direction_) {
+    value: function switchDirection(direction) {
+      if (direction !== this._direction) {
+        if (direction) {
           _get(ArrayFixedDense.prototype.__proto__ || _Object$getPrototypeOf(ArrayFixedDense.prototype), 'collapseLeft', this).call(this);
         } else {
           _get(ArrayFixedDense.prototype.__proto__ || _Object$getPrototypeOf(ArrayFixedDense.prototype), 'collapseRight', this).call(this);
         }
-        this._direction = direction_;
+        this._direction = direction;
       }
     }
   }, {
@@ -2071,7 +2071,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
       }
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
   }, {
     key: 'caretRight',
@@ -2100,7 +2100,7 @@ var ArrayFixedDense = function (_ArrayFixed) {
       }
       this._array[index] = value;
       ++this._count;
-      return;
+      return index;
     }
   }, {
     key: 'caret',
@@ -2120,12 +2120,12 @@ var ArrayFixedDense = function (_ArrayFixed) {
   }], [{
     key: 'fromArray',
     value: function fromArray(array, count) {
-      var direction_ = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      var direction = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
       var arrayFixedDense = new ArrayFixedDense(array.length);
       arrayFixedDense._array = array;
       arrayFixedDense._count = count;
-      arrayFixedDense._direction = direction_;
+      arrayFixedDense._direction = direction;
       return arrayFixedDense;
     }
   }]);
