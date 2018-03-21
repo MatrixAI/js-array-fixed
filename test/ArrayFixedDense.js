@@ -292,3 +292,13 @@ test('caret', t => {
   t.is(arr.length, origLength);
   t.deepEqual(arr.toArray(), [1,2,3,4,5]);
 });
+
+test('caret returns back inserted index', t => {
+  let arr;
+  arr = new ArrayFixedDense([1,2,3, , ,], true);
+  t.is(arr.caret(4, 4), 3);
+  t.is(arr.caret(4, 4), 4);
+  arr = new ArrayFixedDense([ , , 4, 5, 6], false);
+  t.is(arr.caretRight(0, 3), 1);
+  t.is(arr.caretLeft(1, 3), 1);
+});

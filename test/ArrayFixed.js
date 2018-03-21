@@ -208,3 +208,9 @@ test('caret', t => {
   }, RangeError);
   t.deepEqual(arr.toArray(), [ ,2, ,]);
 });
+
+test('caret returns back inserted index', t => {
+  const arr = new ArrayFixed([1, ,2,3,4, ,5]);
+  t.is(arr.caretRight(0, 0), 0);
+  t.is(arr.caretLeft(6, 6), 6);
+});
