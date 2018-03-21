@@ -1,6 +1,6 @@
 {
   "name": "array-fixed",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Array with a Fixed Preallocated Length",
   "keywords": [
     "array"
