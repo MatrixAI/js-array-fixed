@@ -1995,15 +1995,8 @@ var ArrayFixedDense = function (_ArrayFixed) {
       indexStart = _Math$trunc(indexStart);
       if (indexStart < 0) {
         indexStart = Math.max(indexStart + this._array.length, 0);
-      }
-      if (this._direction) {
-        if (indexStart > this._count) {
-          indexStart = this._count;
-        }
       } else {
-        if (indexStart < this._array.length - this._count - 1) {
-          indexStart = this._array.length - this._count - 1;
-        }
+        indexStart = Math.min(indexStart, this._array.length);
       }
       // deleteCount is set to the rest of the array if only indexStart is set
       if (arguments.length === 1) {
@@ -2011,18 +2004,62 @@ var ArrayFixedDense = function (_ArrayFixed) {
       } else {
         // $FlowFixMe: casts nully to 0 AND also truncates to integer
         deleteCount = deleteCount | 0;
+        // the minimum deleteCount is 0
+        deleteCount = Math.max(deleteCount, 0);
+        // the maximum deleteCount is the length where the indexStart starts
+        deleteCount = Math.min(deleteCount, this._array.length - indexStart);
       }
-      if (deleteCount !== items.length) {
-        throw RangeError('Splicing will result in underflow or overflow');
+      // for dense arrays
+      // the splice range may be at the empty range
+      // if so, in order to efficiently splice
+      // we need to shift the indexStart
+      // to be adjacent to the filled range
+      // however we cannot do this if the
+      // splice range includes an empty element
+      // as that would be against the semantics of splice
+      if (this._direction) {
+        // if the beginning of the splice is empty
+        // shift the indexStart to the end of a left-dense array
+        if (!this._array.hasOwnProperty(indexStart)) {
+          indexStart = this._count;
+        }
+      } else {
+        // if the end of the splice is empty
+        // shift the indexStart to the start + deleteCount of a right-dense array
+        if (!this._array.hasOwnProperty(indexStart + deleteCount - 1)) {
+          indexStart = this._array.length - this._count - deleteCount;
+        }
       }
       // count how many set items are deleted
       var deletedCount = 0;
       for (var i = 0; i < deleteCount; ++i) {
         if (this._array.hasOwnProperty(indexStart + i)) ++deletedCount;
       }
-      this._count += items.length - deletedCount;
+      if (this._count - deletedCount + items.length > this._array.length) {
+        throw RangeError('Splicing will result in overflow');
+      }
+      var lengthOrig = this._array.length;
       var deletedItems = (_array = this._array).splice.apply(_array, [indexStart, deleteCount].concat(items));
-      return ArrayFixedDense.fromArray(deletedItems, deletedItems.length, this._direction);
+      // a left dense array can be easily readjusted by truncation
+      // a right dense array is more complicated
+      // either we pad the array from the left using concat
+      // or we have to memmove the contents to the left
+      // and then truncate
+      if (this._direction) {
+        // truncate the array to the appropriate length
+        this._array.length = lengthOrig;
+      } else {
+        if (deleteCount > items.length) {
+          // pad the array from the left
+          this._array = new Array(Math.min(deleteCount - items.length, lengthOrig)).concat(this._array);
+        } else if (deleteCount < items.length) {
+          // move the array left then truncate
+          this._array.copyWithin(0, this._array.length - lengthOrig);
+          this._array.length = lengthOrig;
+        }
+      }
+      this._count += items.length - deletedCount;
+      return ArrayFixedDense.fromArray(deletedItems, deletedCount, this._direction);
     }
   }, {
     key: 'map',
